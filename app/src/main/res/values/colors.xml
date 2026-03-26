@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="bege_fundo">#FCF9F6</color>
+    <color name="marrom_escuro">#584039</color>
+    <color name="marrom_texto_claro">#8D7B73</color>
+    <color name="fundo_card_revisao">#DBD1C9</color>
+
+    <color name="anel_vermelho">#FFE5E5</color>
+    <color name="anel_laranja">#FFF3E0</color>
+    <color name="anel_verde">#E8F5E9</color>
+    <color name="anel_trilha">#F0F0F0</color>
+</resources>

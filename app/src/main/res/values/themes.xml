@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.CronogramaSun" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/bege_fundo</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.CronogramaSun" parent="Base.Theme.CronogramaSun" />
+</resources>
