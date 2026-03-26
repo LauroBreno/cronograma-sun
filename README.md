@@ -49,7 +49,7 @@ O ecossistema do projeto foi construído priorizando estabilidade e o uso de bib
 *Engenheiro Químico & Desenvolvedor de Sistemas (ADS)*
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lauro-freitas-b2850510a/)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/LauroBreno)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/LauroBreno?tab=repositories)
 
 ---
 *Projeto desenvolvido com foco em performance mobile e experiência do usuário (UX).*
