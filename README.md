@@ -6,7 +6,7 @@
 
 Este projeto é um aplicativo **Android Nativo** desenvolvido como solução definitiva para a gestão de cronogramas e desempenho acadêmico.
 
-Ele surgiu de uma necessidade real: substituir uma ferramenta de visualização de estudos feita em Power BI, que apresentava sérias limitações de performance e usabilidade em dispositivos mobile de entrada.
+Ele surgiu de uma necessidade real de substituir uma ferramenta de visualização de estudos feita em Power BI, que apresentava sérias limitações de performance e usabilidade em dispositivos mobile de entrada.
 
 ---
 
@@ -48,8 +48,8 @@ O ecossistema do projeto foi construído priorizando estabilidade e o uso de bib
 **Lauro Breno**
 *Engenheiro Químico & Desenvolvedor de Sistemas (ADS)*
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/seu-linkedin-aqui/)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/seu-usuario-aqui)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lauro-freitas-b2850510a/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/LauroBreno)
 
 ---
 *Projeto desenvolvido com foco em performance mobile e experiência do usuário (UX).*
