@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="12dp"
+    android:paddingHorizontal="24dp"
+    android:gravity="center_vertical">
+
+    <View
+        android:id="@+id/linhaCorLateral"
+        android:layout_width="3dp"
+        android:layout_height="35dp"
+        android:background="#D9534F" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtMateriaDinamica"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#D9534F"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="Materia"/>
+
+        <TextView
+            android:id="@+id/txtAssuntoDinamica"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#D9534F"
+            android:textSize="11sp"
+            android:text="Assunto - Revisão X"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtDiasDinamica"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#D9534F"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:text="X dias"/>
+</LinearLayout>

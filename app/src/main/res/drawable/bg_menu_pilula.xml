@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="300"
+    android:exitFadeDuration="300">
+
+    <item android:state_checked="true">
+        <inset android:insetTop="8dp" android:insetBottom="8dp" android:insetLeft="8dp" android:insetRight="8dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="80dp" /> <solid android:color="#43E0B084" /> </shape>
+        </inset>
+    </item>
+
+    <item android:drawable="@android:color/transparent" />
+
+</selector>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardChipMateria"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="20dp"
+    app:strokeColor="@color/marrom_texto_claro"
+    app:strokeWidth="1dp">
+
+    <TextView
+        android:id="@+id/txtNomeMateriaChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+        android:text="Matéria"
+        android:textColor="@color/marrom_texto_claro"
+        android:textStyle="bold" />
+</com.google.android.material.card.MaterialCardView>

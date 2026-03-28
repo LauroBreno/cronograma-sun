@@ -9,10 +9,10 @@
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottiePaws"
-        android:layout_width="330dp"
-        android:layout_height="330dp"
-        android:layout_marginTop="-20dp"
-        android:layout_marginStart="250dp"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="260dp"
         android:alpha="0.2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:text="Olá Sun,"
                 android:textColor="@color/marrom_texto_claro"
                 android:textSize="26sp"
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="4dp"
-                android:text="Mantenha a constância nos estudos."
+                android:text="Conta comigo para organizar seus estudos!"
                 android:textColor="@color/marrom_texto_claro"
                 android:textSize="14sp" />
 
@@ -66,48 +66,10 @@
                 android:scrollbars="none">
 
                 <LinearLayout
+                    android:id="@+id/containerChipsMaterias"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/chipBiologia"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="12dp"
-                        app:cardBackgroundColor="@color/marrom_escuro"
-                        app:cardCornerRadius="20dp"
-                        app:strokeWidth="0dp">
-                        <TextView
-                            android:id="@+id/txtChipBiologia"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Biologia"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/chipAnatomia"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="12dp"
-                        app:cardBackgroundColor="@color/white"
-                        app:cardCornerRadius="20dp"
-                        app:strokeColor="@color/marrom_texto_claro"
-                        app:strokeWidth="1dp">
-                        <TextView
-                            android:id="@+id/txtChipAnatomia"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Anatomia"
-                            android:textColor="@color/marrom_texto_claro" />
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
+                    android:orientation="horizontal" />
             </HorizontalScrollView>
 
             <androidx.viewpager2.widget.ViewPager2
@@ -115,6 +77,46 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp" />
+
+            <LinearLayout
+                android:id="@+id/containerModoZen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/lottieMeditatingDog"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/meditating_dog" />
+
+                <TextView
+                    android:id="@+id/txtZenTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/marrom_escuro"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="Nossa, você já fez todas as revisões?" />
+
+                <TextView
+                    android:id="@+id/txtZenSubtitulo"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/marrom_texto_claro"
+                    android:textSize="14sp"
+                    tools:text="Quando crescer quero ser igual a você!" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/containerAtrasadas"
@@ -165,144 +167,76 @@
                     app:strokeWidth="0dp">
 
                     <LinearLayout
+                        android:id="@+id/containerListaAtrasadas"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="24dp"
-                        android:gravity="center_vertical">
+                        android:orientation="vertical"
+                        android:paddingVertical="12dp" />
 
-                        <View
-                            android:layout_width="3dp"
-                            android:layout_height="40dp"
-                            android:background="#D9534F" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Sistema Esquelético"
-                                android:textColor="#D9534F"
-                                android:textSize="16sp"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Revisão 1"
-                                android:textColor="#D9534F"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Atrasada"
-                            android:textColor="#D9534F"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
+                android:id="@+id/containerProximas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp"
-                android:clipChildren="false">
+                android:orientation="vertical"
+                android:visibility="visible">
 
-                <TextView
-                    android:id="@+id/lblProximas"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Próximas Revisões"
-                    android:textColor="@color/marrom_escuro"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/lottieDog"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:scaleX="2.5"
-                    android:scaleY="2.5"
-                    app:layout_constraintBottom_toBottomOf="@id/lblProximas"
-                    app:layout_constraintTop_toTopOf="@id/lblProximas"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:lottie_autoPlay="true"
-                    app:lottie_loop="true"
-                    app:lottie_rawRes="@raw/happy_dog" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                app:cardBackgroundColor="@color/fundo_card_revisao"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="24dp"
-                    android:gravity="center_vertical">
-
-                    <View
-                        android:layout_width="3dp"
-                        android:layout_height="40dp"
-                        android:background="@color/marrom_texto_claro" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/txtRevisaoMateria"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Mitocôndria"
-                            android:textColor="@color/marrom_escuro"
-                            android:textSize="16sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:id="@+id/txtRevisaoAssunto"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Revisão 2"
-                            android:textColor="@color/marrom_escuro"
-                            android:textSize="12sp" />
-                    </LinearLayout>
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:clipChildren="false">
 
                     <TextView
+                        android:id="@+id/lblProximas"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2026-03-25"
+                        android:text="Próximas Revisões"
                         android:textColor="@color/marrom_escuro"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-    </ScrollView>
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:id="@+id/lottieDog"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:scaleX="2.5"
+                        android:scaleY="2.5"
+                        app:layout_constraintBottom_toBottomOf="@id/lblProximas"
+                        app:layout_constraintTop_toTopOf="@id/lblProximas"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:lottie_autoPlay="true"
+                        app:lottie_loop="true"
+                        app:lottie_rawRes="@raw/happy_dog" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    app:cardBackgroundColor="@color/fundo_card_revisao"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:id="@+id/containerListaProximas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingVertical="12dp" />
+
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+        </LinearLayout> </ScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
@@ -315,7 +249,8 @@
         app:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/white" />
+        app:tint="@color/white"
+        android:contentDescription="Organizar matérias, assuntos ou notas"/>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
@@ -335,7 +270,10 @@
             android:background="@android:color/transparent"
             app:itemIconSize="24dp"
             app:itemIconTint="@color/white"
+            app:itemRippleColor="#40FFFFFF"
+            app:itemBackground="@drawable/bg_menu_pilula"
             app:labelVisibilityMode="unlabeled"
+            style="@style/Widget.MaterialComponents.BottomNavigationView"
             app:menu="@menu/bottom_nav_menu" />
     </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
