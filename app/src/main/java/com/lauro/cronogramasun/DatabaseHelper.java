@@ -16,7 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Informações Básicas do Banco
     private static final String DATABASE_NAME = "CronogramaSun.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     // ==========================================
     // NOMES DAS TABELAS
@@ -527,5 +527,290 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return tem;
     }
-}
 
+    // 12. Pega a meta atual de uma matéria para preencher no modal
+    public double obterMetaMateria(String nomeMateria) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT meta_nota FROM " + TABELA_MATERIAS + " WHERE nome = ?", new String[]{nomeMateria});
+        double meta = 0.0;
+        if (cursor.moveToFirst()) {
+            meta = cursor.getDouble(0);
+        }
+        cursor.close();
+        db.close();
+        return meta;
+    }
+
+    // 13. Edita a Matéria e a Meta (com proteção anti-duplicidade)
+    public boolean atualizarMateria(String nomeAntigo, String novoNome, double novaMeta) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Se o usuário mudou o nome da matéria, verificamos se o nome novo já existe
+        if (!nomeAntigo.equalsIgnoreCase(novoNome)) {
+            Cursor cursor = db.rawQuery("SELECT id FROM " + TABELA_MATERIAS + " WHERE LOWER(nome) = LOWER(?)", new String[]{novoNome});
+            if (cursor.getCount() > 0) {
+                cursor.close();
+                db.close();
+                return false; // Falhou: O novo nome já está em uso!
+            }
+            cursor.close();
+        }
+
+        ContentValues values = new ContentValues();
+        values.put("nome", novoNome);
+        values.put("meta_nota", novaMeta);
+
+        int linhasAfetadas = db.update(TABELA_MATERIAS, values, "nome = ?", new String[]{nomeAntigo});
+        db.close();
+
+        return linhasAfetadas > 0; // Se alterou > 0 linhas, foi sucesso
+    }
+
+    // 14. Edita o nome do Assunto (com proteção anti-duplicidade)
+    public boolean atualizarAssunto(String nomeMateria, String nomeAntigoAssunto, String novoNomeAssunto) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 1º Descobre qual é o ID da Matéria dona desse Assunto
+        Cursor cMat = db.rawQuery("SELECT id FROM " + TABELA_MATERIAS + " WHERE nome = ?", new String[]{nomeMateria});
+        int materiaId = -1;
+        if (cMat.moveToFirst()) {
+            materiaId = cMat.getInt(0);
+        }
+        cMat.close();
+
+        if (materiaId == -1) return false;
+
+        // 2º Se mudou o nome, verifica se a matéria já tem outro assunto com esse nome novo
+        if (!nomeAntigoAssunto.equalsIgnoreCase(novoNomeAssunto)) {
+            Cursor cCheck = db.rawQuery("SELECT id FROM " + TABELA_ASSUNTOS + " WHERE materia_id = ? AND LOWER(nome) = LOWER(?)",
+                    new String[]{String.valueOf(materiaId), novoNomeAssunto});
+            if (cCheck.getCount() > 0) {
+                cCheck.close();
+                db.close();
+                return false; // Falhou: Já existe um assunto com esse nome nessa matéria!
+            }
+            cCheck.close();
+        }
+
+        ContentValues values = new ContentValues();
+        values.put("nome", novoNomeAssunto);
+
+        int linhasAfetadas = db.update(TABELA_ASSUNTOS, values, "materia_id = ? AND nome = ?",
+                new String[]{String.valueOf(materiaId), nomeAntigoAssunto});
+        db.close();
+
+        return linhasAfetadas > 0;
+    }
+
+    // ==========================================
+    // MÉTODOS DE REVISÃO (EDITAR/ADICIONAR)
+    // ==========================================
+
+    // 15. Busca todas as revisões de um assunto específico
+    public List<java.util.HashMap<String, String>> obterRevisoesDoAssunto(String nomeMateria, String nomeAssunto) {
+        List<java.util.HashMap<String, String>> revisoes = new java.util.ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Primeiro, acha o ID do assunto cruzando com a matéria
+        String queryId = "SELECT a.id FROM " + TABELA_ASSUNTOS + " a " +
+                "INNER JOIN " + TABELA_MATERIAS + " m ON a.materia_id = m.id " +
+                "WHERE m.nome = ? AND a.nome = ?";
+        Cursor cId = db.rawQuery(queryId, new String[]{nomeMateria, nomeAssunto});
+        int assuntoId = -1;
+        if (cId.moveToFirst()) {
+            assuntoId = cId.getInt(0);
+        }
+        cId.close();
+
+        if (assuntoId == -1) {
+            db.close();
+            return revisoes; // Retorna vazio se não achar
+        }
+
+        // CORREÇÃO: Usando 'data_programada' e 'status' corretos
+        Cursor cRev = db.rawQuery("SELECT id, data_programada, status FROM " + TABELA_REVISOES +
+                " WHERE assunto_id = ? ORDER BY id ASC", new String[]{String.valueOf(assuntoId)});
+
+        while (cRev.moveToNext()) {
+            java.util.HashMap<String, String> rev = new java.util.HashMap<>();
+            rev.put("id", String.valueOf(cRev.getInt(0)));
+            rev.put("data", cRev.getString(1)); // Pega a data_programada
+            rev.put("status", cRev.getString(2)); // Pega o status (PENDENTE, CONCLUIDA)
+            revisoes.add(rev);
+        }
+        cRev.close();
+        db.close();
+        return revisoes;
+    }
+
+    // 16. Atualiza a data de uma revisão existente
+    public boolean atualizarDataRevisao(int revisaoId, String novaData) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // CORREÇÃO: Nome da coluna é 'data_programada'
+        values.put("data_programada", novaData);
+
+        int linhasAfetadas = db.update(TABELA_REVISOES, values, "id = ?", new String[]{String.valueOf(revisaoId)});
+        db.close();
+        return linhasAfetadas > 0;
+    }
+
+    // 17. Adiciona uma revisão extra (Até o limite de 5)
+    public boolean adicionarRevisaoExtra(String nomeMateria, String nomeAssunto, String novaData) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Pega o ID do assunto
+        String queryId = "SELECT a.id FROM " + TABELA_ASSUNTOS + " a " +
+                "INNER JOIN " + TABELA_MATERIAS + " m ON a.materia_id = m.id " +
+                "WHERE m.nome = ? AND a.nome = ?";
+        Cursor cId = db.rawQuery(queryId, new String[]{nomeMateria, nomeAssunto});
+        int assuntoId = -1;
+        if (cId.moveToFirst()) {
+            assuntoId = cId.getInt(0);
+        }
+        cId.close();
+
+        if (assuntoId == -1) return false;
+
+        // BÔNUS SÊNIOR: Calcula qual é o "numero_revisao" correto da nova revisão (ex: se já tem 3, a nova será a 4)
+        Cursor cNum = db.rawQuery("SELECT MAX(numero_revisao) FROM " + TABELA_REVISOES + " WHERE assunto_id = ?", new String[]{String.valueOf(assuntoId)});
+        int proxNumero = 1;
+        if (cNum.moveToFirst()) {
+            proxNumero = cNum.getInt(0) + 1;
+        }
+        cNum.close();
+
+        ContentValues values = new ContentValues();
+        values.put("assunto_id", assuntoId);
+        values.put("numero_revisao", proxNumero);
+        values.put("data_programada", novaData); // CORREÇÃO
+        values.put("status", "PENDENTE"); // CORREÇÃO: Status correto em texto
+
+        long result = db.insert(TABELA_REVISOES, null, values);
+        db.close();
+        return result != -1;
+    }
+
+    // ==========================================
+    // MÉTODOS DE EDIÇÃO DE NOTAS
+    // ==========================================
+
+    // 18. Busca as revisões e cruza com a nota real que o usuário tirou
+    public List<java.util.HashMap<String, String>> obterRevisoesComNotas(String nomeMateria, String nomeAssunto) {
+        List<java.util.HashMap<String, String>> lista = new java.util.ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Pega o ID do assunto
+        Cursor cId = db.rawQuery("SELECT a.id FROM " + TABELA_ASSUNTOS + " a INNER JOIN " + TABELA_MATERIAS + " m ON a.materia_id = m.id WHERE m.nome = ? AND a.nome = ?", new String[]{nomeMateria, nomeAssunto});
+        int assuntoId = -1;
+        if (cId.moveToFirst()) assuntoId = cId.getInt(0);
+        cId.close();
+
+        if (assuntoId == -1) return lista;
+
+        // Busca as revisões
+        Cursor cRev = db.rawQuery("SELECT id, numero_revisao, data_programada, status FROM " + TABELA_REVISOES + " WHERE assunto_id = ? ORDER BY numero_revisao ASC", new String[]{String.valueOf(assuntoId)});
+        // Busca as notas (desempenho) na ordem de criação
+        Cursor cNota = db.rawQuery("SELECT id, nota_direta, acertos, total_questoes FROM " + TABELA_DESEMPENHO + " WHERE assunto_id = ? ORDER BY id ASC", new String[]{String.valueOf(assuntoId)});
+
+        while (cRev.moveToNext()) {
+            java.util.HashMap<String, String> map = new java.util.HashMap<>();
+            map.put("rev_id", String.valueOf(cRev.getInt(0)));
+            map.put("numero", String.valueOf(cRev.getInt(1)));
+            map.put("data", cRev.getString(2));
+            map.put("status", cRev.getString(3));
+
+            // Se está concluída, deve ter uma nota correspondente
+            if ("CONCLUIDA".equalsIgnoreCase(map.get("status")) && cNota.moveToNext()) {
+                map.put("desempenho_id", String.valueOf(cNota.getInt(0)));
+                double notaDireta = cNota.getDouble(1);
+                if (notaDireta >= 0) {
+                    map.put("nota", String.valueOf(notaDireta));
+                } else {
+                    int acertos = cNota.getInt(2);
+                    int total = cNota.getInt(3);
+                    // Transforma a fração em nota base 10 para facilitar a edição
+                    double calc = ((double) acertos / total) * 10.0;
+                    map.put("nota", String.format(new java.util.Locale("pt", "BR"), "%.1f", calc).replace(",", "."));
+                }
+            } else {
+                map.put("nota", "-");
+                map.put("desempenho_id", "-1");
+            }
+            lista.add(map);
+        }
+        cRev.close();
+        cNota.close();
+        db.close();
+        return lista;
+    }
+
+    // 19. Salva a nova nota editada
+    public boolean atualizarNotaDesempenho(int desempenhoId, double novaNota) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("nota_direta", novaNota);
+        values.put("acertos", 0); // Zera a fração para assumir a nota direta
+        values.put("total_questoes", 0);
+
+        int result = db.update(TABELA_DESEMPENHO, values, "id = ?", new String[]{String.valueOf(desempenhoId)});
+        db.close();
+        return result > 0;
+    }
+
+    // ==========================================
+    // MÉTODOS DE EXCLUSÃO (DELETAR)
+    // ==========================================
+
+    // 20. Excluir Matéria (O CASCADE apaga assuntos, notas e revisões automaticamente!)
+    public boolean excluirMateria(String nomeMateria) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int linhas = db.delete(TABELA_MATERIAS, "nome = ?", new String[]{nomeMateria});
+        db.close();
+        return linhas > 0;
+    }
+
+    // 21. Excluir Assunto (O CASCADE apaga notas e revisões atreladas a ele!)
+    public boolean excluirAssunto(String nomeMateria, String nomeAssunto) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Primeiro acha a matéria
+        Cursor c = db.rawQuery("SELECT id FROM " + TABELA_MATERIAS + " WHERE nome = ?", new String[]{nomeMateria});
+        int materiaId = -1;
+        if (c.moveToFirst()) materiaId = c.getInt(0);
+        c.close();
+
+        if (materiaId == -1) return false;
+
+        int linhas = db.delete(TABELA_ASSUNTOS, "materia_id = ? AND nome = ?", new String[]{String.valueOf(materiaId), nomeAssunto});
+        db.close();
+        return linhas > 0;
+    }
+
+    // 22. Excluir uma Revisão Específica
+    public boolean excluirRevisaoEspecifica(int revisaoId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int linhas = db.delete(TABELA_REVISOES, "id = ?", new String[]{String.valueOf(revisaoId)});
+        db.close();
+        return linhas > 0;
+    }
+
+    // 23. Excluir Nota e "Devolver" a revisão para Pendente
+    public boolean excluirNotaEspecifica(int desempenhoId, int assuntoId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 1º Apaga a nota
+        int linhas = db.delete(TABELA_DESEMPENHO, "id = ?", new String[]{String.valueOf(desempenhoId)});
+
+        // 2º Pega a ÚLTIMA revisão que foi concluída e devolve pra PENDENTE (Reverte a ação!)
+        if (linhas > 0) {
+            String updateQuery = "UPDATE " + TABELA_REVISOES +
+                    " SET status = 'PENDENTE' " +
+                    " WHERE id = (SELECT id FROM " + TABELA_REVISOES +
+                    " WHERE assunto_id = ? AND status = 'CONCLUIDA' ORDER BY numero_revisao DESC LIMIT 1)";
+            db.execSQL(updateQuery, new Object[]{assuntoId});
+        }
+
+        db.close();
+        return linhas > 0;
+    }
+}

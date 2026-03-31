@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtZenSubtitulo;
     private LottieAnimationView lottieMeditatingDog;
     private String materiaSelecionadaAtual = "";
+    private String abaPendenteModal = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,10 +142,12 @@ public class MainActivity extends AppCompatActivity {
             boolean isUpdating = false;
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
@@ -257,8 +260,7 @@ public class MainActivity extends AppCompatActivity {
                 btnEditar.setAlpha(1f);
                 btnEditar.setOnClickListener(v -> {
                     menuDialog.dismiss();
-                    // abrirModalEdicao();
-                    mostrarNotificacao("Modal de Edição em breve!", false);
+                    abrirModalEdicao();
                 });
             } else {
                 btnEditar.setAlpha(0.4f);
@@ -272,8 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 btnExcluir.setAlpha(1f);
                 btnExcluir.setOnClickListener(v -> {
                     menuDialog.dismiss();
-                    // abrirModalExclusao();
-                    mostrarNotificacao("Modal de Exclusão em breve!", false);
+                    abrirModalExclusao();
                 });
             } else {
                 btnExcluir.setAlpha(0.4f);
@@ -318,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
 
         List<String> materiasSalvas = dbHelper.obterNomesMaterias();
         android.widget.ArrayAdapter<String> adapterMateria = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, materiasSalvas);
-        if (autoCompleteVinculoMateria != null) autoCompleteVinculoMateria.setAdapter(adapterMateria);
+        if (autoCompleteVinculoMateria != null)
+            autoCompleteVinculoMateria.setAdapter(adapterMateria);
 
         String[] qtds = new String[]{"1", "2", "3", "4", "5"};
         android.widget.ArrayAdapter<String> adapterQtd = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, qtds);
@@ -340,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
 
                     inputData.setOnClickListener(v -> {
                         java.util.Calendar cal = java.util.Calendar.getInstance();
-                        android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(MainActivity.this,
+                        android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(MainActivity.this,R.style.TemaCalendarioSun,
                                 (view1, year, month, dayOfMonth) -> {
                                     String date = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year);
                                     inputData.setText(date);
@@ -388,7 +390,8 @@ public class MainActivity extends AppCompatActivity {
                     if (inputNomeMateria != null) inputNomeMateria.setText("");
                     if (inputMetaMateria != null) inputMetaMateria.setText("");
                     if (inputNomeAssunto != null) inputNomeAssunto.setText("");
-                    if (autoCompleteVinculoMateria != null) autoCompleteVinculoMateria.setText("", false);
+                    if (autoCompleteVinculoMateria != null)
+                        autoCompleteVinculoMateria.setText("", false);
                     if (autoQtdRevisoes != null) autoQtdRevisoes.setText("", false);
                     containerDatasRevisoes.removeAllViews();
                     listaInputsData.clear();
@@ -512,6 +515,251 @@ public class MainActivity extends AppCompatActivity {
         formDialog.show();
     }
 
+    private void abrirModalEdicao() {
+        BottomSheetDialog editDialog = new BottomSheetDialog(MainActivity.this);
+        editDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+        editDialog.setContentView(R.layout.layout_bottom_sheet_editar);
+
+        LinearLayout layoutEditMateria = editDialog.findViewById(R.id.layoutEditMateria);
+        LinearLayout layoutEditAssunto = editDialog.findViewById(R.id.layoutEditAssunto);
+        LinearLayout layoutEditRevisao = editDialog.findViewById(R.id.layoutEditRevisao);
+        LinearLayout layoutEditNota = editDialog.findViewById(R.id.layoutEditNota);
+
+        ImageView btnFechar = editDialog.findViewById(R.id.btnFecharEdit);
+        TextView lblTituloForm = editDialog.findViewById(R.id.lblTituloEditForm);
+        com.google.android.material.button.MaterialButton btnSalvar = editDialog.findViewById(R.id.btnSalvarEdicao);
+
+        TextView btnNavMateria = editDialog.findViewById(R.id.btnEditToggleMateria);
+        TextView btnNavAssunto = editDialog.findViewById(R.id.btnEditToggleAssunto);
+        TextView btnNavRevisao = editDialog.findViewById(R.id.btnEditToggleRevisao);
+        TextView btnNavNota = editDialog.findViewById(R.id.btnEditToggleNota);
+
+        android.widget.AutoCompleteTextView autoEditMateriaSelect = editDialog.findViewById(R.id.autoCompleteEditMateriaSelect);
+        com.google.android.material.textfield.TextInputEditText inputEditNomeMateria = editDialog.findViewById(R.id.inputEditNomeMateria);
+        com.google.android.material.textfield.TextInputEditText inputEditMetaMateria = editDialog.findViewById(R.id.inputEditMetaMateria);
+
+        android.widget.AutoCompleteTextView autoEditMateriaForAssunto = editDialog.findViewById(R.id.autoCompleteEditMateriaForAssunto);
+        android.widget.AutoCompleteTextView autoEditAssuntoSelect = editDialog.findViewById(R.id.autoCompleteEditAssuntoSelect);
+        com.google.android.material.textfield.TextInputEditText inputEditNomeAssunto = editDialog.findViewById(R.id.inputEditNomeAssunto);
+
+        aplicarMascaraNota(inputEditMetaMateria);
+
+        if (btnFechar != null) {
+            btnFechar.setOnClickListener(v -> {
+                editDialog.dismiss();
+                abrirMenuOpcoes();
+            });
+        }
+
+        View.OnClickListener clickNav = view -> {
+            btnNavMateria.setBackgroundColor(Color.TRANSPARENT);
+            btnNavMateria.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavMateria.setTypeface(null, Typeface.NORMAL);
+
+            btnNavAssunto.setBackgroundColor(Color.TRANSPARENT);
+            btnNavAssunto.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavAssunto.setTypeface(null, Typeface.NORMAL);
+
+            btnNavRevisao.setBackgroundColor(Color.TRANSPARENT);
+            btnNavRevisao.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavRevisao.setTypeface(null, Typeface.NORMAL);
+
+            btnNavNota.setBackgroundColor(Color.TRANSPARENT);
+            btnNavNota.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavNota.setTypeface(null, Typeface.NORMAL);
+
+            layoutEditMateria.setVisibility(View.GONE);
+            layoutEditAssunto.setVisibility(View.GONE);
+            layoutEditRevisao.setVisibility(View.GONE);
+            layoutEditNota.setVisibility(View.GONE);
+
+            TextView clicado = (TextView) view;
+            clicado.setBackgroundColor(Color.parseColor("#584039"));
+            clicado.setTextColor(Color.WHITE);
+            clicado.setTypeface(null, Typeface.BOLD);
+
+            if (clicado.getId() == R.id.btnEditToggleMateria) {
+                lblTituloForm.setText("Editar Matéria");
+                layoutEditMateria.setVisibility(View.VISIBLE);
+                btnSalvar.setVisibility(View.VISIBLE);
+            } else if (clicado.getId() == R.id.btnEditToggleAssunto) {
+                lblTituloForm.setText("Editar Assunto");
+                layoutEditAssunto.setVisibility(View.VISIBLE);
+                btnSalvar.setVisibility(View.VISIBLE);
+            } else if (clicado.getId() == R.id.btnEditToggleRevisao) {
+                lblTituloForm.setText("Gerenciar Revisões");
+                layoutEditRevisao.setVisibility(View.VISIBLE);
+                btnSalvar.setVisibility(View.GONE);
+            } else if (clicado.getId() == R.id.btnEditToggleNota) {
+                lblTituloForm.setText("Editar Nota");
+                layoutEditNota.setVisibility(View.VISIBLE);
+                btnSalvar.setVisibility(View.GONE);
+            }
+        };
+
+        btnNavMateria.setOnClickListener(clickNav);
+        btnNavAssunto.setOnClickListener(clickNav);
+        btnNavRevisao.setOnClickListener(clickNav);
+        btnNavNota.setOnClickListener(clickNav);
+
+        List<String> materiasSalvas = dbHelper.obterNomesMaterias();
+        android.widget.ArrayAdapter<String> adapterMateria = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, materiasSalvas);
+
+        if (autoEditMateriaSelect != null) autoEditMateriaSelect.setAdapter(adapterMateria);
+        if (autoEditMateriaForAssunto != null) autoEditMateriaForAssunto.setAdapter(adapterMateria);
+
+        if (autoEditMateriaSelect != null) {
+            autoEditMateriaSelect.setOnItemClickListener((parent, view, position, id) -> {
+                String matSelecionada = adapterMateria.getItem(position);
+                double metaAtual = dbHelper.obterMetaMateria(matSelecionada);
+                inputEditNomeMateria.setText(matSelecionada);
+                inputEditMetaMateria.setText(metaAtual > 0 ? String.valueOf(metaAtual) : "");
+            });
+        }
+
+        if (autoEditMateriaForAssunto != null && autoEditAssuntoSelect != null) {
+            autoEditMateriaForAssunto.setOnItemClickListener((parent, view, position, id) -> {
+                String matEscolhida = adapterMateria.getItem(position);
+                autoEditAssuntoSelect.setText("", false);
+                inputEditNomeAssunto.setText("");
+
+                List<String> assuntosDaMateria = dbHelper.obterAssuntosPorMateria(matEscolhida);
+                android.widget.ArrayAdapter<String> adapterAssunto = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, assuntosDaMateria);
+                autoEditAssuntoSelect.setAdapter(adapterAssunto);
+            });
+
+            autoEditAssuntoSelect.setOnItemClickListener((parent, view, position, id) -> {
+                String assuntoEscolhido = autoEditAssuntoSelect.getText().toString();
+                inputEditNomeAssunto.setText(assuntoEscolhido);
+            });
+        }
+
+        // =====================================
+        // ABA REVISÕES (Lógica de Carregamento)
+        // =====================================
+        android.widget.AutoCompleteTextView autoRevMateria = editDialog.findViewById(R.id.autoCompleteRevMateria);
+        android.widget.AutoCompleteTextView autoRevAssunto = editDialog.findViewById(R.id.autoCompleteRevAssunto);
+        TextView txtStatusRevisoes = editDialog.findViewById(R.id.txtStatusRevisoes);
+        LinearLayout containerRevisoes = editDialog.findViewById(R.id.containerListaEditRevisoes);
+        TextView btnAddRevisao = editDialog.findViewById(R.id.btnAdicionarNovaRevisao);
+
+        if (autoRevMateria != null) autoRevMateria.setAdapter(adapterMateria);
+
+        if (autoRevMateria != null && autoRevAssunto != null) {
+            autoRevMateria.setOnItemClickListener((parent, view, position, id) -> {
+                String matEscolhida = adapterMateria.getItem(position);
+                autoRevAssunto.setText("", false);
+                containerRevisoes.removeAllViews();
+                txtStatusRevisoes.setText("Selecione um assunto para ver as revisões.");
+                btnAddRevisao.setVisibility(View.GONE);
+
+                List<String> assuntosDaMateria = dbHelper.obterAssuntosPorMateria(matEscolhida);
+                android.widget.ArrayAdapter<String> adapterAssuntoRev = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, assuntosDaMateria);
+                autoRevAssunto.setAdapter(adapterAssuntoRev);
+            });
+
+            autoRevAssunto.setOnItemClickListener((parent, view, position, id) -> {
+                String mat = autoRevMateria.getText().toString();
+                String ass = autoRevAssunto.getText().toString();
+                carregarRevisoesNoEditor(mat, ass, containerRevisoes, txtStatusRevisoes, btnAddRevisao);
+            });
+        }
+
+        // =====================================
+        // ABA NOTAS (Lógica de Carregamento)
+        // =====================================
+        android.widget.AutoCompleteTextView autoNotaMateria = editDialog.findViewById(R.id.autoCompleteNotaMateria);
+        android.widget.AutoCompleteTextView autoNotaAssunto = editDialog.findViewById(R.id.autoCompleteNotaAssunto);
+        TextView txtStatusNotas = editDialog.findViewById(R.id.txtStatusNotas);
+        LinearLayout containerNotas = editDialog.findViewById(R.id.containerListaEditNotas);
+
+        if (autoNotaMateria != null) autoNotaMateria.setAdapter(adapterMateria);
+
+        if (autoNotaMateria != null && autoNotaAssunto != null) {
+            autoNotaMateria.setOnItemClickListener((parent, view, position, id) -> {
+                String matEscolhida = adapterMateria.getItem(position);
+                autoNotaAssunto.setText("", false);
+                containerNotas.removeAllViews();
+                txtStatusNotas.setText("Selecione um assunto para ver as notas.");
+
+                List<String> assuntosDaMateria = dbHelper.obterAssuntosPorMateria(matEscolhida);
+                android.widget.ArrayAdapter<String> adapterAssuntoNota = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, assuntosDaMateria);
+                autoNotaAssunto.setAdapter(adapterAssuntoNota);
+            });
+
+            autoNotaAssunto.setOnItemClickListener((parent, view, position, id) -> {
+                String mat = autoNotaMateria.getText().toString();
+                String ass = autoNotaAssunto.getText().toString();
+                carregarNotasNoEditor(mat, ass, containerNotas, txtStatusNotas);
+            });
+        }
+
+        if (btnSalvar != null) {
+            btnSalvar.setOnClickListener(v -> {
+                View viewSegura = findViewById(android.R.id.content);
+
+                if (layoutEditMateria.getVisibility() == View.VISIBLE) {
+                    String materiaAntiga = autoEditMateriaSelect.getText().toString().trim();
+                    String novoNome = padronizarTexto(inputEditNomeMateria.getText().toString());
+                    String novaMetaStr = inputEditMetaMateria.getText().toString().trim();
+
+                    if (materiaAntiga.isEmpty() || novoNome.isEmpty()) {
+                        mostrarNotificacao(btnSalvar, "Selecione uma matéria e defina um nome válido!", true);
+                        return;
+                    }
+
+                    double novaMeta = novaMetaStr.isEmpty() ? 0.0 : Double.parseDouble(novaMetaStr);
+                    boolean sucesso = dbHelper.atualizarMateria(materiaAntiga, novoNome, novaMeta);
+
+                    if (sucesso) {
+                        if (materiaSelecionadaAtual.equals(materiaAntiga)) {
+                            materiaSelecionadaAtual = novoNome;
+                        }
+                        mostrarNotificacao(viewSegura, "Matéria atualizada com sucesso!", false);
+                        atualizarTelaCompleta();
+                        editDialog.dismiss();
+                    } else {
+                        mostrarNotificacao(btnSalvar, "Erro: Já existe outra matéria com esse nome!", true);
+                    }
+
+                } else if (layoutEditAssunto.getVisibility() == View.VISIBLE) {
+                    String materiaSelecionada = autoEditMateriaForAssunto.getText().toString().trim();
+                    String assuntoAntigo = autoEditAssuntoSelect.getText().toString().trim();
+                    String novoNomeAssunto = padronizarTexto(inputEditNomeAssunto.getText().toString());
+
+                    if (materiaSelecionada.isEmpty() || assuntoAntigo.isEmpty() || novoNomeAssunto.isEmpty()) {
+                        mostrarNotificacao(btnSalvar, "Preencha todos os campos do assunto!", true);
+                        return;
+                    }
+
+                    boolean sucesso = dbHelper.atualizarAssunto(materiaSelecionada, assuntoAntigo, novoNomeAssunto);
+
+                    // Lógica para abrir a aba certa automaticamente (Gestos para Expert)
+                    if ("MATERIA".equals(abaPendenteModal)) {
+                        btnNavMateria.performClick();
+                        abaPendenteModal = "";
+                    } else if ("ASSUNTO".equals(abaPendenteModal)) {
+                        btnNavAssunto.performClick();
+                        abaPendenteModal = "";
+                    } else if ("REVISAO".equals(abaPendenteModal)) {
+                        btnNavRevisao.performClick();
+                        abaPendenteModal = "";
+                    }
+                }
+            });
+        }
+
+        editDialog.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+        if ("MATERIA".equals(abaPendenteModal)) {
+            btnNavMateria.performClick();
+            abaPendenteModal = "";
+        } else if ("ASSUNTO".equals(abaPendenteModal)) {
+            btnNavAssunto.performClick();
+            abaPendenteModal = "";
+        }
+        editDialog.show();
+    }
+
     private void mostrarDialogConfirmacaoMateria(BottomSheetDialog formPai, String nomeMateria, String metaTxt, Runnable acaoSalvar) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_confirmacao, null);
@@ -531,8 +779,8 @@ public class MainActivity extends AppCompatActivity {
         txtMeta.setText("Meta: " + (metaTxt.isEmpty() ? "0.0" : metaTxt));
         txtName.setText(nomeMateria);
 
-        if(txtEx1 != null) txtEx1.setVisibility(View.GONE);
-        if(txtEx2 != null) txtEx2.setVisibility(View.GONE);
+        if (txtEx1 != null) txtEx1.setVisibility(View.GONE);
+        if (txtEx2 != null) txtEx2.setVisibility(View.GONE);
 
         dialogView.findViewById(R.id.btnCancelarDialog).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnConfirmarDialog).setOnClickListener(v -> {
@@ -573,7 +821,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if(txtEx2 != null) txtEx2.setVisibility(View.GONE);
+        if (txtEx2 != null) txtEx2.setVisibility(View.GONE);
 
         dialogView.findViewById(R.id.btnCancelarDialog).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnConfirmarDialog).setOnClickListener(v -> {
@@ -821,7 +1069,7 @@ public class MainActivity extends AppCompatActivity {
                     atualizarTelaCompleta(); // Usa o Maestro! Sem tela branca!
                 }
             });
-
+            aplicarMenuFlutuante(cardChip, "MATERIA");
             containerChipsMaterias.addView(viewChip);
         }
 
@@ -858,10 +1106,12 @@ public class MainActivity extends AppCompatActivity {
         if (materiaSelecionadaAtual == null || materiaSelecionadaAtual.isEmpty()) {
             if (containerModoZen != null) {
                 containerModoZen.setVisibility(View.VISIBLE);
-                if (txtZenTitulo != null) txtZenTitulo.setText("Opa, parece que você ainda não começou!");
-                if (txtZenSubtitulo != null) txtZenSubtitulo.setText("Que tal adicionar a primeira matéria clicando no + ali embaixo?");
+                if (txtZenTitulo != null)
+                    txtZenTitulo.setText("Opa, parece que você ainda não começou!");
+                if (txtZenSubtitulo != null)
+                    txtZenSubtitulo.setText("Que tal adicionar a primeira matéria clicando no + ali embaixo?");
                 if (lottieMeditatingDog != null) {
-                    lottieMeditatingDog.setAnimation(R.raw.the_wolf_turns_head);
+                    lottieMeditatingDog.setAnimation(R.raw.meditating_dog);
                     lottieMeditatingDog.playAnimation();
                 }
             }
@@ -935,6 +1185,7 @@ public class MainActivity extends AppCompatActivity {
                 txtDias.setTextColor(corAtrasada);
                 linhaLateral.setBackgroundColor(corAtrasada);
 
+                aplicarMenuFlutuante(itemCard, "REVISAO");
                 if (containerListaAtrasadas != null) containerListaAtrasadas.addView(itemCard);
                 count++;
             }
@@ -969,6 +1220,7 @@ public class MainActivity extends AppCompatActivity {
                 txtDias.setTextColor(corProxima);
                 linhaLateral.setBackgroundColor(Color.parseColor("#D6C4B8"));
 
+                aplicarMenuFlutuante(itemCard, "REVISAO");
                 if (containerListaProximas != null) containerListaProximas.addView(itemCard);
                 count++;
             }
@@ -984,15 +1236,19 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (!temAssuntos) {
-                    if (txtZenTitulo != null) txtZenTitulo.setText("Poxa Sun, você ainda não se planejou?");
-                    if (txtZenSubtitulo != null) txtZenSubtitulo.setText("Vamos lá, me deixa te ajudar! Clique no + e adicione um Assunto.");
+                    if (txtZenTitulo != null)
+                        txtZenTitulo.setText("Poxa Sun, você ainda não se planejou?");
+                    if (txtZenSubtitulo != null)
+                        txtZenSubtitulo.setText("Vamos lá, me deixa te ajudar! Clique no + e adicione um Assunto.");
                     if (lottieMeditatingDog != null) {
                         lottieMeditatingDog.setAnimation(R.raw.the_wolf_turns_head);
                         lottieMeditatingDog.playAnimation();
                     }
                 } else {
-                    if (txtZenTitulo != null) txtZenTitulo.setText("Nossa, você já fez todas as revisões?");
-                    if (txtZenSubtitulo != null) txtZenSubtitulo.setText("Quando crescer quero ser igual a você!");
+                    if (txtZenTitulo != null)
+                        txtZenTitulo.setText("Nossa, você já fez todas as revisões?");
+                    if (txtZenSubtitulo != null)
+                        txtZenSubtitulo.setText("Quando crescer quero ser igual a você!");
                     if (lottieMeditatingDog != null) {
                         lottieMeditatingDog.setAnimation(R.raw.meditating_dog);
                         lottieMeditatingDog.playAnimation();
@@ -1109,6 +1365,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             animarGrafico(holder.progressCircular, holder.txtNota, data.nota);
+            aplicarMenuFlutuante(holder.cardContainer, data.isMateria ? "MATERIA" : "ASSUNTO");
         }
 
         private void configurarFundoUrgencia(boolean isUrgente, LinearLayout layout, ImageView icone, TextView texto) {
@@ -1187,5 +1444,734 @@ public class MainActivity extends AppCompatActivity {
                 txtEventos = itemView.findViewById(R.id.txtEventosDin);
             }
         }
+    }
+
+    // ==========================================
+    // MÁGICA DA ABA DE REVISÕES - FATIA 9
+    // ==========================================
+
+    // 1. Validador de Ordem Cronológica
+    private boolean validarOrdemDatas(String dataAnteriorStr, String dataNovaStr, String dataPosteriorStr) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR"));
+        try {
+            java.util.Date dataNova = sdf.parse(dataNovaStr);
+
+            // A data nova TEM que ser estritamente DEPOIS da data anterior
+            if (dataAnteriorStr != null && !dataAnteriorStr.isEmpty()) {
+                java.util.Date dataAnterior = sdf.parse(dataAnteriorStr);
+                if (!dataNova.after(dataAnterior)) return false;
+            }
+
+            // A data nova TEM que ser estritamente ANTES da próxima data
+            if (dataPosteriorStr != null && !dataPosteriorStr.isEmpty()) {
+                java.util.Date dataPosterior = sdf.parse(dataPosteriorStr);
+                if (!dataNova.before(dataPosterior)) return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 2. Blindagem de Revisão
+    // ==========================================
+    // ABA REVISÕES (COM ALINHAMENTO PERFEITO)
+    // ==========================================
+    private void carregarRevisoesNoEditor(String materia, String assunto, LinearLayout container, TextView txtStatus, TextView btnAdd) {
+        container.removeAllViews();
+        List<java.util.HashMap<String, String>> revisoes = dbHelper.obterRevisoesDoAssunto(materia, assunto);
+
+        if (revisoes.isEmpty()) {
+            txtStatus.setText("Nenhuma revisão encontrada para este assunto.");
+            container.setBackground(null);
+            btnAdd.setVisibility(View.GONE);
+            return;
+        }
+
+        txtStatus.setText("Revisões cadastradas (" + revisoes.size() + "/5):");
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR"));
+
+        android.graphics.drawable.GradientDrawable shapeCard = new android.graphics.drawable.GradientDrawable();
+        shapeCard.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        shapeCard.setCornerRadius(48f);
+        shapeCard.setColor(android.graphics.Color.TRANSPARENT);
+        shapeCard.setStroke(3, android.graphics.Color.parseColor("#D7CCC8"));
+        container.setBackground(shapeCard);
+        container.setPadding(8, 16, 8, 16);
+
+        for (int i = 0; i < revisoes.size(); i++) {
+            java.util.HashMap<String, String> rev = revisoes.get(i);
+            int revId = Integer.parseInt(rev.get("id"));
+            String dataAtual = rev.get("data");
+            String status = rev.get("status");
+            int numeroRevisao = i + 1;
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(32, 32, 32, 32);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            row.setBackgroundResource(outValue.resourceId);
+
+            TextView lblRev = new TextView(this);
+            lblRev.setText("Revisão " + numeroRevisao);
+            lblRev.setTextColor(android.graphics.Color.parseColor("#584039"));
+            lblRev.setTextSize(16f);
+            lblRev.setTypeface(null, android.graphics.Typeface.BOLD);
+            lblRev.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+
+            // CONTAINER DA DIREITA COM ALINHAMENTO FIXO
+            LinearLayout rightContainer = new LinearLayout(this);
+            rightContainer.setOrientation(LinearLayout.HORIZONTAL);
+            rightContainer.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+
+            TextView txtData = new TextView(this);
+            txtData.setText(dataAtual);
+            txtData.setTextSize(16f);
+
+            ImageView iconCheck = new ImageView(this);
+            int iconSize = (int) (20 * getResources().getDisplayMetrics().density);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
+            iconParams.setMargins((int) (12 * getResources().getDisplayMetrics().density), 0, 0, 0);
+            iconCheck.setLayoutParams(iconParams);
+            iconCheck.setImageResource(R.drawable.ic_check_concluido);
+
+            if (status.equalsIgnoreCase("CONCLUIDA")) {
+                txtData.setTextColor(android.graphics.Color.parseColor("#4CAF50")); // Verde
+                iconCheck.setVisibility(View.VISIBLE);
+            } else {
+                txtData.setTextColor(android.graphics.Color.parseColor("#8D7B73")); // Marrom
+                iconCheck.setVisibility(View.INVISIBLE); // MÁGICA: Ocupa espaço, mas não aparece!
+            }
+
+            rightContainer.addView(txtData);
+            rightContainer.addView(iconCheck);
+
+            // CLIQUE PARA EDITAR DATA
+            final int indexAtual = i;
+            row.setOnClickListener(v -> {
+                if (status.equalsIgnoreCase("CONCLUIDA")) {
+                    mostrarNotificacao(container, "Esta revisão já foi concluída e não pode ser alterada!", true);
+                    return;
+                }
+
+                java.util.Calendar calendarioInicial = java.util.Calendar.getInstance();
+                try { calendarioInicial.setTime(sdf.parse(dataAtual)); } catch (Exception e) {}
+
+                android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(MainActivity.this,R.style.TemaCalendarioSun, (view, year, month, dayOfMonth) -> {
+                    String dataEscolhida = String.format(new java.util.Locale("pt", "BR"), "%02d/%02d/%04d", dayOfMonth, month + 1, year);
+                    if (dbHelper.atualizarDataRevisao(revId, dataEscolhida)) {
+                        mostrarNotificacao(container, "Data atualizada!", false);
+                        carregarRevisoesNoEditor(materia, assunto, container, txtStatus, btnAdd);
+                        atualizarTelaCompleta();
+                    }
+                }, calendarioInicial.get(java.util.Calendar.YEAR), calendarioInicial.get(java.util.Calendar.MONTH), calendarioInicial.get(java.util.Calendar.DAY_OF_MONTH));
+
+                try {
+                    android.widget.DatePicker datePicker = datePickerDialog.getDatePicker();
+                    java.util.Calendar minCal = java.util.Calendar.getInstance();
+
+                    if (indexAtual > 0) {
+                        java.util.Date dataAnt = sdf.parse(revisoes.get(indexAtual - 1).get("data"));
+                        java.util.Calendar calAnt = java.util.Calendar.getInstance();
+                        calAnt.setTime(dataAnt);
+                        calAnt.add(java.util.Calendar.DAY_OF_MONTH, 1);
+                        if (calAnt.after(minCal)) minCal = calAnt;
+                    }
+                    datePicker.setMinDate(minCal.getTimeInMillis());
+
+                    if (indexAtual < revisoes.size() - 1) {
+                        java.util.Date dataPost = sdf.parse(revisoes.get(indexAtual + 1).get("data"));
+                        java.util.Calendar maxCal = java.util.Calendar.getInstance();
+                        maxCal.setTime(dataPost);
+                        maxCal.add(java.util.Calendar.DAY_OF_MONTH, -1);
+                        if (maxCal.getTimeInMillis() >= minCal.getTimeInMillis()) {
+                            datePicker.setMaxDate(maxCal.getTimeInMillis());
+                        } else {
+                            datePicker.setMaxDate(minCal.getTimeInMillis());
+                        }
+                    }
+                } catch (Exception e) {}
+
+                datePickerDialog.show();
+            });
+
+            row.addView(lblRev);
+            row.addView(rightContainer);
+            container.addView(row);
+
+            if (i < revisoes.size() - 1) {
+                View divider = new View(this);
+                LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2);
+                divParams.setMargins(32, 0, 32, 0);
+                divider.setLayoutParams(divParams);
+                divider.setBackgroundColor(android.graphics.Color.parseColor("#EFEAE4"));
+                container.addView(divider);
+            }
+        }
+
+        if (revisoes.size() < 5) {
+            btnAdd.setVisibility(View.VISIBLE);
+            btnAdd.setText("+ Adicionar Nova Revisão");
+            btnAdd.setGravity(android.view.Gravity.CENTER);
+            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            btnParams.setMargins(0, 16, 0, 0);
+            btnAdd.setLayoutParams(btnParams);
+            btnAdd.setPadding(0, 32, 0, 16);
+
+            btnAdd.setOnClickListener(v -> {
+                java.util.Calendar calendarioInicial = java.util.Calendar.getInstance();
+                java.util.Date dataUltima = new java.util.Date();
+                try {
+                    dataUltima = sdf.parse(revisoes.get(revisoes.size() - 1).get("data"));
+                    calendarioInicial.setTime(dataUltima);
+                    calendarioInicial.add(java.util.Calendar.DAY_OF_MONTH, 1);
+                } catch (Exception e) {}
+
+                android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(MainActivity.this,R.style.TemaCalendarioSun, (view, year, month, dayOfMonth) -> {
+                    String dataEscolhida = String.format(new java.util.Locale("pt", "BR"), "%02d/%02d/%04d", dayOfMonth, month + 1, year);
+                    if (dbHelper.adicionarRevisaoExtra(materia, assunto, dataEscolhida)) {
+                        mostrarNotificacao(container, "Nova revisão adicionada!", false);
+                        carregarRevisoesNoEditor(materia, assunto, container, txtStatus, btnAdd);
+                        atualizarTelaCompleta();
+                    }
+                }, calendarioInicial.get(java.util.Calendar.YEAR), calendarioInicial.get(java.util.Calendar.MONTH), calendarioInicial.get(java.util.Calendar.DAY_OF_MONTH));
+
+                try {
+                    java.util.Calendar minCal = java.util.Calendar.getInstance();
+                    java.util.Calendar calUltima = java.util.Calendar.getInstance();
+                    calUltima.setTime(dataUltima);
+                    calUltima.add(java.util.Calendar.DAY_OF_MONTH, 1);
+                    if (calUltima.after(minCal)) minCal = calUltima;
+                    datePickerDialog.getDatePicker().setMinDate(minCal.getTimeInMillis());
+                } catch (Exception e) {}
+                datePickerDialog.setOnShowListener(d -> {
+                    datePickerDialog.getButton(android.app.DatePickerDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#584039"));
+                    datePickerDialog.getButton(android.app.DatePickerDialog.BUTTON_NEGATIVE).setTextColor(android.graphics.Color.parseColor("#584039"));
+                });
+                datePickerDialog.show();
+            });
+        } else {
+            btnAdd.setVisibility(View.GONE);
+        }
+    }
+
+    // ==========================================
+    // ABA NOTAS (COM ALINHAMENTO PERFEITO)
+    // ==========================================
+    private void carregarNotasNoEditor(String materia, String assunto, LinearLayout container, TextView txtStatus) {
+        container.removeAllViews();
+        List<java.util.HashMap<String, String>> revisoes = dbHelper.obterRevisoesComNotas(materia, assunto);
+
+        if (revisoes.isEmpty()) {
+            txtStatus.setText("Nenhuma revisão encontrada para este assunto.");
+            container.setBackground(null);
+            return;
+        }
+
+        txtStatus.setText("Notas das revisões. Clique para editar:");
+
+        android.graphics.drawable.GradientDrawable shapeCard = new android.graphics.drawable.GradientDrawable();
+        shapeCard.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        shapeCard.setCornerRadius(48f);
+        shapeCard.setColor(android.graphics.Color.TRANSPARENT);
+        shapeCard.setStroke(3, android.graphics.Color.parseColor("#D7CCC8"));
+        container.setBackground(shapeCard);
+        container.setPadding(8, 16, 8, 16);
+
+        for (int i = 0; i < revisoes.size(); i++) {
+            java.util.HashMap<String, String> rev = revisoes.get(i);
+            String status = rev.get("status");
+            String notaAtual = rev.get("nota");
+            String desempenhoId = rev.get("desempenho_id");
+            int numeroRevisao = i + 1;
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(32, 32, 32, 32);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            row.setBackgroundResource(outValue.resourceId);
+
+            TextView lblRev = new TextView(this);
+            lblRev.setText("Revisão " + numeroRevisao);
+            lblRev.setTextColor(android.graphics.Color.parseColor("#584039"));
+            lblRev.setTextSize(16f);
+            lblRev.setTypeface(null, android.graphics.Typeface.BOLD);
+            lblRev.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+
+            // CONTAINER DA DIREITA COM ALINHAMENTO FIXO
+            LinearLayout rightContainer = new LinearLayout(this);
+            rightContainer.setOrientation(LinearLayout.HORIZONTAL);
+            rightContainer.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+
+            TextView txtNota = new TextView(this);
+            txtNota.setTextSize(16f);
+            txtNota.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            ImageView iconLock = new ImageView(this);
+            int iconSize = (int) (20 * getResources().getDisplayMetrics().density);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
+            iconParams.setMargins((int) (12 * getResources().getDisplayMetrics().density), 0, 0, 0);
+            iconLock.setLayoutParams(iconParams);
+
+            if (status.equalsIgnoreCase("CONCLUIDA")) {
+                txtNota.setText(notaAtual);
+                txtNota.setTextColor(android.graphics.Color.parseColor("#4CAF50")); // Verde
+                iconLock.setImageResource(R.drawable.ic_check_concluido);
+                iconLock.setVisibility(View.VISIBLE);
+
+                // =========================================================
+                // MÁGICA UX: ANIMAÇÃO DE PULSO (Dica visual de clique)
+                // =========================================================
+                Runnable pulseAnimation = new Runnable() {
+                    @Override
+                    public void run() {
+                        // Faz a linha inteira dar uma leve "pulsada" (Aumenta 2% e volta)
+                        row.animate()
+                                .scaleX(1.08f).scaleY(1.08f)
+                                .setDuration(200)
+                                .withEndAction(() -> {
+                                    row.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
+                                }).start();
+
+                        // Repete essa mesma animação a cada 10 segundos
+                        row.postDelayed(this, 5000);
+                    }
+                };
+
+                // Começa a animação 1.5 segundos após abrir a tela.
+                // Bônus Sênior: O "+ (i * 200)" faz um efeito cascata! A revisão 1 pulsa,
+                // depois a 2, depois a 3... fica parecendo um batimento cardíaco na lista!
+                row.postDelayed(pulseAnimation, 1500 + (i * 200));
+
+                // CLIQUE PARA EDITAR A NOTA
+                row.setOnClickListener(v -> {
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+                    builder.setTitle("Editar Nota - Revisão " + numeroRevisao);
+
+                    final android.widget.EditText input = new android.widget.EditText(MainActivity.this);
+                    input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    input.setText(notaAtual);
+                    input.selectAll();
+                    builder.setView(input);
+
+                    builder.setPositiveButton("Salvar", (dialog, which) -> {
+                        try {
+                            double novaNota = Double.parseDouble(input.getText().toString().replace(",", "."));
+                            if (novaNota < 0 || novaNota > 10) throw new NumberFormatException();
+
+                            if (dbHelper.atualizarNotaDesempenho(Integer.parseInt(desempenhoId), novaNota)) {
+                                mostrarNotificacao(container, "Nota atualizada!", false);
+                                carregarNotasNoEditor(materia, assunto, container, txtStatus);
+                                atualizarTelaCompleta();
+                            }
+                        } catch (Exception e) {
+                            mostrarNotificacao(container, "Digite uma nota válida entre 0 e 10!", true);
+                        }
+                    });
+                    builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+                    builder.show();
+                });
+
+            } else {
+                txtNota.setText("Pendente");
+                txtNota.setTextColor(android.graphics.Color.parseColor("#8D7B73"));
+                iconLock.setImageResource(android.R.drawable.ic_secure);
+                iconLock.setColorFilter(android.graphics.Color.parseColor("#8D7B73"));
+                iconLock.setVisibility(View.VISIBLE); // Mostra o cadeado na pendente
+
+                row.setOnClickListener(v -> mostrarNotificacao(container, "Conclua esta revisão primeiro para dar uma nota!", true));
+            }
+
+            rightContainer.addView(txtNota);
+            rightContainer.addView(iconLock);
+            row.addView(lblRev);
+            row.addView(rightContainer);
+            container.addView(row);
+
+            if (i < revisoes.size() - 1) {
+                View divider = new View(this);
+                LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2);
+                divParams.setMargins(32, 0, 32, 0);
+                divider.setLayoutParams(divParams);
+                divider.setBackgroundColor(android.graphics.Color.parseColor("#EFEAE4"));
+                container.addView(divider);
+            }
+        }
+    }
+
+    // ==========================================
+    // LÓGICA DE EXCLUSÃO ESPECÍFICA (REVISÃO / NOTA)
+    // ==========================================
+    private void carregarListaExclusao(String materia, String assunto, LinearLayout container, TextView txtStatus, String tipo) {
+        container.removeAllViews();
+        List<java.util.HashMap<String, String>> revisoes = dbHelper.obterRevisoesComNotas(materia, assunto);
+
+        if (revisoes.isEmpty()) {
+            txtStatus.setText("Nenhum dado encontrado para excluir.");
+            container.setBackground(null);
+            return;
+        }
+
+        txtStatus.setText(tipo.equals("REVISAO") ? "Toque em uma revisão para excluí-la:" : "Toque em uma nota para excluí-la:");
+
+        android.graphics.drawable.GradientDrawable shapeCard = new android.graphics.drawable.GradientDrawable();
+        shapeCard.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        shapeCard.setCornerRadius(48f);
+        shapeCard.setColor(android.graphics.Color.TRANSPARENT);
+        shapeCard.setStroke(3, android.graphics.Color.parseColor("#D7CCC8"));
+        container.setBackground(shapeCard);
+        container.setPadding(8, 16, 8, 16);
+
+        for (int i = 0; i < revisoes.size(); i++) {
+            java.util.HashMap<String, String> rev = revisoes.get(i);
+            int revId = Integer.parseInt(rev.get("rev_id"));
+            int desempenhoId = Integer.parseInt(rev.get("desempenho_id"));
+            String status = rev.get("status");
+            String nota = rev.get("nota");
+            int numeroRevisao = i + 1;
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(32, 32, 32, 32);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            row.setBackgroundResource(outValue.resourceId);
+
+            TextView lblEsq = new TextView(this);
+            lblEsq.setText("Revisão " + numeroRevisao);
+            lblEsq.setTextColor(android.graphics.Color.parseColor("#584039"));
+            lblEsq.setTextSize(16f);
+            lblEsq.setTypeface(null, android.graphics.Typeface.BOLD);
+            lblEsq.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+
+            LinearLayout rightContainer = new LinearLayout(this);
+            rightContainer.setOrientation(LinearLayout.HORIZONTAL);
+            rightContainer.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+
+            TextView txtDir = new TextView(this);
+            txtDir.setTextSize(16f);
+
+            ImageView iconTrash = new ImageView(this);
+            iconTrash.setImageResource(android.R.drawable.ic_menu_delete); // Lixeira nativa
+            iconTrash.setColorFilter(android.graphics.Color.parseColor("#D9534F")); // Vermelha
+            int iconSize = (int) (20 * getResources().getDisplayMetrics().density);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
+            iconParams.setMargins((int) (12 * getResources().getDisplayMetrics().density), 0, 0, 0);
+            iconTrash.setLayoutParams(iconParams);
+
+            // Regras de Exibição dependendo da Aba selecionada (Revisão ou Nota)
+            boolean podeExcluir = false;
+
+            if (tipo.equals("REVISAO")) {
+                txtDir.setText(rev.get("data"));
+                if (status.equalsIgnoreCase("CONCLUIDA")) {
+                    txtDir.setTextColor(android.graphics.Color.parseColor("#8D7B73"));
+                    iconTrash.setVisibility(View.INVISIBLE); // Não deixa apagar revisão concluída (apague a nota primeiro)
+                } else {
+                    txtDir.setTextColor(android.graphics.Color.parseColor("#584039"));
+                    iconTrash.setVisibility(View.VISIBLE);
+                    podeExcluir = true;
+                }
+            } else {
+                if (status.equalsIgnoreCase("CONCLUIDA")) {
+                    txtDir.setText("Nota: " + nota);
+                    txtDir.setTextColor(android.graphics.Color.parseColor("#584039"));
+                    iconTrash.setVisibility(View.VISIBLE);
+                    podeExcluir = true;
+                } else {
+                    txtDir.setText("Sem Nota");
+                    txtDir.setTextColor(android.graphics.Color.parseColor("#8D7B73"));
+                    iconTrash.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            rightContainer.addView(txtDir);
+            rightContainer.addView(iconTrash);
+
+            // Ação de Exclusão Individual
+            if (podeExcluir) {
+                row.setOnClickListener(v -> {
+                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
+                            .setTitle(tipo.equals("REVISAO") ? "Excluir Revisão?" : "Excluir Nota?")
+                            .setMessage("Tem certeza que deseja apagar permanentemente?")
+                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                                boolean sucesso;
+
+                                // Se for Nota, a exclusão reverte a revisão para "PENDENTE"
+                                if (tipo.equals("NOTA")) {
+                                    // Precisamos do ID do assunto para reverter a revisão correta
+                                    android.database.Cursor cAssId = dbHelper.getReadableDatabase().rawQuery("SELECT a.id FROM assuntos a INNER JOIN materias m ON a.materia_id = m.id WHERE m.nome = ? AND a.nome = ?", new String[]{materia, assunto});
+                                    int assId = -1;
+                                    if (cAssId.moveToFirst()) assId = cAssId.getInt(0);
+                                    cAssId.close();
+
+                                    sucesso = dbHelper.excluirNotaEspecifica(desempenhoId, assId);
+                                } else {
+                                    sucesso = dbHelper.excluirRevisaoEspecifica(revId);
+                                }
+
+                                if (sucesso) {
+                                    mostrarNotificacao(container, "Excluído com sucesso!", false);
+                                    carregarListaExclusao(materia, assunto, container, txtStatus, tipo);
+                                    atualizarTelaCompleta();
+                                }
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                });
+            } else {
+                row.setOnClickListener(v -> {
+                    if (tipo.equals("REVISAO")) mostrarNotificacao(container, "Não é possível apagar uma revisão concluída.", true);
+                    else mostrarNotificacao(container, "Não há nota para apagar aqui.", true);
+                });
+            }
+
+            row.addView(lblEsq);
+            row.addView(rightContainer);
+            container.addView(row);
+
+            if (i < revisoes.size() - 1) {
+                View divider = new View(this);
+                LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2);
+                divParams.setMargins(32, 0, 32, 0);
+                divider.setLayoutParams(divParams);
+                divider.setBackgroundColor(android.graphics.Color.parseColor("#EFEAE4"));
+                container.addView(divider);
+            }
+        }
+    }
+
+    // ==========================================
+    // PAINEL INFERIOR DE EXCLUSÃO
+    // ==========================================
+    private void abrirModalExclusao() {
+        com.google.android.material.bottomsheet.BottomSheetDialog delDialog = new com.google.android.material.bottomsheet.BottomSheetDialog(MainActivity.this);
+        delDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+        delDialog.setContentView(R.layout.layout_bottom_sheet_excluir);
+
+        LinearLayout layoutDelMateria = delDialog.findViewById(R.id.layoutDelMateria);
+        LinearLayout layoutDelAssunto = delDialog.findViewById(R.id.layoutDelAssunto);
+        LinearLayout layoutDelListas = delDialog.findViewById(R.id.layoutDelListas);
+
+        ImageView btnFechar = delDialog.findViewById(R.id.btnFecharDel);
+        TextView lblTituloForm = delDialog.findViewById(R.id.lblTituloDelForm);
+        com.google.android.material.button.MaterialButton btnConfirmar = delDialog.findViewById(R.id.btnConfirmarExclusao);
+
+        TextView btnNavMateria = delDialog.findViewById(R.id.btnDelToggleMateria);
+        TextView btnNavAssunto = delDialog.findViewById(R.id.btnDelToggleAssunto);
+        TextView btnNavRevisao = delDialog.findViewById(R.id.btnDelToggleRevisao);
+        TextView btnNavNota = delDialog.findViewById(R.id.btnDelToggleNota);
+
+        android.widget.AutoCompleteTextView autoDelMateria = delDialog.findViewById(R.id.autoCompleteDelMateria);
+        android.widget.AutoCompleteTextView autoDelMatAssunto = delDialog.findViewById(R.id.autoCompleteDelMatAssunto);
+        android.widget.AutoCompleteTextView autoDelAssunto = delDialog.findViewById(R.id.autoCompleteDelAssunto);
+        android.widget.AutoCompleteTextView autoDelListMat = delDialog.findViewById(R.id.autoCompleteDelListMat);
+        android.widget.AutoCompleteTextView autoDelListAss = delDialog.findViewById(R.id.autoCompleteDelListAss);
+
+        TextView txtStatusDelete = delDialog.findViewById(R.id.txtStatusDelete);
+        LinearLayout containerListaDelete = delDialog.findViewById(R.id.containerListaDelete);
+
+        if (btnFechar != null) {
+            btnFechar.setOnClickListener(v -> {
+                delDialog.dismiss();
+                abrirMenuOpcoes();
+            });
+        }
+
+        View.OnClickListener clickNav = view -> {
+            btnNavMateria.setBackgroundColor(Color.TRANSPARENT);
+            btnNavMateria.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavMateria.setTypeface(null, Typeface.NORMAL);
+
+            btnNavAssunto.setBackgroundColor(Color.TRANSPARENT);
+            btnNavAssunto.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavAssunto.setTypeface(null, Typeface.NORMAL);
+
+            btnNavRevisao.setBackgroundColor(Color.TRANSPARENT);
+            btnNavRevisao.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavRevisao.setTypeface(null, Typeface.NORMAL);
+
+            btnNavNota.setBackgroundColor(Color.TRANSPARENT);
+            btnNavNota.setTextColor(Color.parseColor("#8D7B73"));
+            btnNavNota.setTypeface(null, Typeface.NORMAL);
+
+            layoutDelMateria.setVisibility(View.GONE);
+            layoutDelAssunto.setVisibility(View.GONE);
+            layoutDelListas.setVisibility(View.GONE);
+
+            TextView clicado = (TextView) view;
+            clicado.setBackgroundColor(Color.parseColor("#D9534F")); // Vermelho Alerta
+            clicado.setTextColor(Color.WHITE);
+            clicado.setTypeface(null, Typeface.BOLD);
+
+            if (clicado.getId() == R.id.btnDelToggleMateria) {
+                lblTituloForm.setText("Excluir Matéria");
+                layoutDelMateria.setVisibility(View.VISIBLE);
+                btnConfirmar.setVisibility(View.VISIBLE);
+            } else if (clicado.getId() == R.id.btnDelToggleAssunto) {
+                lblTituloForm.setText("Excluir Assunto");
+                layoutDelAssunto.setVisibility(View.VISIBLE);
+                btnConfirmar.setVisibility(View.VISIBLE);
+            } else if (clicado.getId() == R.id.btnDelToggleRevisao) {
+                lblTituloForm.setText("Excluir Revisão");
+                layoutDelListas.setVisibility(View.VISIBLE);
+                btnConfirmar.setVisibility(View.GONE); // Apaga clicando direto na lixeira
+                containerListaDelete.removeAllViews();
+                autoDelListAss.setText("", false);
+            } else if (clicado.getId() == R.id.btnDelToggleNota) {
+                lblTituloForm.setText("Excluir Nota");
+                layoutDelListas.setVisibility(View.VISIBLE);
+                btnConfirmar.setVisibility(View.GONE);
+                containerListaDelete.removeAllViews();
+                autoDelListAss.setText("", false);
+            }
+        };
+
+        btnNavMateria.setOnClickListener(clickNav);
+        btnNavAssunto.setOnClickListener(clickNav);
+        btnNavRevisao.setOnClickListener(clickNav);
+        btnNavNota.setOnClickListener(clickNav);
+
+        List<String> materiasSalvas = dbHelper.obterNomesMaterias();
+        android.widget.ArrayAdapter<String> adapterMateria = new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, materiasSalvas);
+
+        if (autoDelMateria != null) autoDelMateria.setAdapter(adapterMateria);
+        if (autoDelMatAssunto != null) autoDelMatAssunto.setAdapter(adapterMateria);
+        if (autoDelListMat != null) autoDelListMat.setAdapter(adapterMateria);
+
+        if (autoDelMatAssunto != null && autoDelAssunto != null) {
+            autoDelMatAssunto.setOnItemClickListener((parent, view, position, id) -> {
+                String mat = adapterMateria.getItem(position);
+                autoDelAssunto.setText("", false);
+                List<String> assuntos = dbHelper.obterAssuntosPorMateria(mat);
+                autoDelAssunto.setAdapter(new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, assuntos));
+            });
+        }
+
+        if (autoDelListMat != null && autoDelListAss != null) {
+            autoDelListMat.setOnItemClickListener((parent, view, position, id) -> {
+                String mat = adapterMateria.getItem(position);
+                autoDelListAss.setText("", false);
+                containerListaDelete.removeAllViews();
+                txtStatusDelete.setText("Selecione um assunto.");
+                List<String> assuntos = dbHelper.obterAssuntosPorMateria(mat);
+                autoDelListAss.setAdapter(new android.widget.ArrayAdapter<>(this, R.layout.item_dropdown, assuntos));
+            });
+
+            autoDelListAss.setOnItemClickListener((parent, view, position, id) -> {
+                String mat = autoDelListMat.getText().toString();
+                String ass = autoDelListAss.getText().toString();
+
+                if (btnNavRevisao.getCurrentTextColor() == Color.WHITE) {
+                    carregarListaExclusao(mat, ass, containerListaDelete, txtStatusDelete, "REVISAO");
+                } else {
+                    carregarListaExclusao(mat, ass, containerListaDelete, txtStatusDelete, "NOTA");
+                }
+            });
+        }
+
+        if (btnConfirmar != null) {
+            btnConfirmar.setOnClickListener(v -> {
+                View viewSegura = findViewById(android.R.id.content);
+
+                if (layoutDelMateria.getVisibility() == View.VISIBLE) {
+                    String mat = autoDelMateria.getText().toString().trim();
+                    if (mat.isEmpty()) {
+                        mostrarNotificacao(btnConfirmar, "Selecione uma matéria!", true);
+                        return;
+                    }
+
+                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
+                            .setTitle("Excluir Matéria?")
+                            .setMessage("Isso apagará todas as revisões, assuntos e notas de " + mat + ". Tem certeza?")
+                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                                if (dbHelper.excluirMateria(mat)) {
+                                    mostrarNotificacao(viewSegura, "Matéria excluída com sucesso!", false);
+                                    atualizarTelaCompleta();
+                                    delDialog.dismiss();
+                                }
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+
+                } else if (layoutDelAssunto.getVisibility() == View.VISIBLE) {
+                    String mat = autoDelMatAssunto.getText().toString().trim();
+                    String ass = autoDelAssunto.getText().toString().trim();
+                    if (mat.isEmpty() || ass.isEmpty()) {
+                        mostrarNotificacao(btnConfirmar, "Selecione matéria e assunto!", true);
+                        return;
+                    }
+
+                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
+                            .setTitle("Excluir Assunto?")
+                            .setMessage("Isso apagará o assunto " + ass + " e suas revisões. Continuar?")
+                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                                if (dbHelper.excluirAssunto(mat, ass)) {
+                                    mostrarNotificacao(viewSegura, "Assunto excluído!", false);
+                                    atualizarTelaCompleta();
+                                    delDialog.dismiss();
+                                }
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                }
+            });
+        }
+
+        delDialog.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+        // Lógica para abrir a aba certa automaticamente (Gestos para Expert)
+        if ("MATERIA".equals(abaPendenteModal)) {
+            btnNavMateria.performClick();
+            abaPendenteModal = "";
+        } else if ("ASSUNTO".equals(abaPendenteModal)) {
+            btnNavAssunto.performClick();
+            abaPendenteModal = "";
+        } else if ("REVISAO".equals(abaPendenteModal)) {
+            btnNavRevisao.performClick();
+            abaPendenteModal = "";
+        }
+        delDialog.show();
+    }
+
+    // ==========================================
+    // MENU FLUTUANTE (GESTOS PARA EXPERTS)
+    // ==========================================
+    // ==========================================
+    // MENU FLUTUANTE ESTILIZADO (GESTOS PARA EXPERTS)
+    // ==========================================
+    private void aplicarMenuFlutuante(android.view.View viewAlvo, String abaFoco) {
+        viewAlvo.setOnLongClickListener(v -> {
+
+            // Aqui envelopamos o menu com a cor bege e marrom!
+            android.content.Context wrapper = new android.view.ContextThemeWrapper(MainActivity.this, R.style.TemaMenuFlutuante);
+            android.widget.PopupMenu popup = new android.widget.PopupMenu(wrapper, v);
+
+            popup.getMenu().add(0, 1, 0, "Editar").setIcon(android.R.drawable.ic_menu_edit);
+            popup.getMenu().add(0, 2, 0, "Excluir").setIcon(android.R.drawable.ic_menu_delete);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                popup.setForceShowIcon(true);
+            }
+
+            popup.setOnMenuItemClickListener(item -> {
+                abaPendenteModal = abaFoco; // Salva o destino (Matéria, Assunto ou Revisão)
+
+                if (item.getItemId() == 1) abrirModalEdicao();
+                else if (item.getItemId() == 2) abrirModalExclusao();
+
+                return true;
+            });
+
+            popup.show();
+            return true;
+        });
     }
 }

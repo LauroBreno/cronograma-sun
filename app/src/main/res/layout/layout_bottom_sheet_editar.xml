@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:backgroundTint="@color/bege_fundo"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#D7CCC8" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:id="@+id/btnFecharEdit"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#BCAAA4" />
+
+        <TextView
+            android:id="@+id/lblTituloEditForm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Editar Matéria"
+            android:textColor="@color/marrom_escuro"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieCatEdit"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="-21dp"
+        android:elevation="4dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loader_cat" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="24dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#E0E0E0"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:id="@+id/toggleGroupEditar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnEditToggleMateria"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/marrom_escuro"
+                android:gravity="center"
+                android:text="Matéria"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0" />
+
+            <TextView
+                android:id="@+id/btnEditToggleAssunto"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:text="Assunto"
+                android:textColor="#8D7B73"
+                android:textSize="12sp" />
+
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0" />
+
+            <TextView
+                android:id="@+id/btnEditToggleRevisao"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:text="Revisões"
+                android:textColor="#8D7B73"
+                android:textSize="12sp" />
+
+            <View android:layout_width="1dp" android:layout_height="match_parent" android:background="#E0E0E0" />
+
+            <TextView
+                android:id="@+id/btnEditToggleNota"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:text="Nota"
+                android:textColor="#8D7B73"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:id="@+id/layoutEditMateria"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione a Matéria">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteEditMateriaSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Novo Nome (Opcional)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputEditNomeMateria"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/marrom_escuro"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Nova Meta Para Nota (Opcional)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputEditMetaMateria"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/marrom_escuro"
+                android:selectAllOnFocus="true"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutEditAssunto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Matéria do Assunto">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteEditMateriaForAssunto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione o Assunto">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteEditAssuntoSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Novo Nome do Assunto">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputEditNomeAssunto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/marrom_escuro"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutEditRevisao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione a Matéria">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteRevMateria"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione o Assunto">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteRevAssunto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/txtStatusRevisoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selecione um assunto para ver as revisões."
+            android:textColor="#8D7B73"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            android:textAlignment="center"/>
+
+        <LinearLayout
+            android:id="@+id/containerListaEditRevisoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/btnAdicionarNovaRevisao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Adicionar Nova Revisão"
+            android:textColor="@color/marrom_escuro"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutEditNota"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione a Matéria">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteNotaMateria"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxBackgroundColor="@color/bege_fundo"
+            app:boxStrokeColor="@color/marrom_texto_claro"
+            app:hintTextColor="@color/marrom_escuro"
+            app:endIconTint="@color/marrom_escuro"
+            android:hint="Selecione o Assunto">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteNotaAssunto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:paddingVertical="16dp"
+                android:textColor="@color/marrom_escuro"
+                android:popupBackground="@drawable/shape_dropdown_popup"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/txtStatusNotas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selecione um assunto para ver as notas."
+            android:textColor="#8D7B73"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            android:textAlignment="center"/>
+
+        <LinearLayout
+            android:id="@+id/containerListaEditNotas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp"/>
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSalvarEdicao"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:backgroundTint="@color/marrom_escuro"
+        android:text="Salvar Alterações"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="16dp" />
+</LinearLayout>

@@ -3,5 +3,21 @@
     <style name="Base.Theme.CronogramaSun" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/bege_fundo</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/marrom_escuro</item>
+        <item name="android:textColorHighlight">#4D584039</item>
     </style>
+    <style name="TemaCalendarioSun" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/marrom_escuro</item>
+        <item name="colorPrimary">@color/marrom_escuro</item> <item name="android:colorBackground">@color/bege_fundo</item>
+        <item name="android:textColorPrimary">@color/marrom_escuro</item>
+        <item name="android:textColorSecondary">#8D7B73</item>
+    </style>
+
+    <style name="TemaAlertaSun" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/marrom_escuro</item>
+        <item name="colorPrimary">@color/marrom_escuro</item> <item name="android:colorBackground">@color/bege_fundo</item>
+        <item name="android:textColorPrimary">@color/marrom_escuro</item>
+    </style>
+
+    <style name="Theme.CronogramaSun" parent="Base.Theme.CronogramaSun" />
 </resources>
