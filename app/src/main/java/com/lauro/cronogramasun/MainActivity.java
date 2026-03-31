@@ -79,6 +79,34 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(view -> abrirMenuOpcoes());
+        // Encontre o seu botão de + (substitua o ID pelo ID real do seu botão)
+        android.view.View btnAdicionarMain = findViewById(R.id.fabAdd);
+
+        // ==========================================
+        // MÁGICA UX: ANIMAÇÃO DE PULSO (Heartbeat)
+        // ==========================================
+        Runnable animacaoPulso = new Runnable() {
+            @Override
+            public void run() {
+                // O botão cresce 15% (1.15f) rapidamente
+                btnAdicionarMain.animate()
+                        .scaleX(1.20f).scaleY(1.20f)
+                        .setDuration(200)
+                        .withEndAction(() -> {
+                            // Quando termina de crescer, ele volta ao tamanho original (1f)
+                            btnAdicionarMain.animate()
+                                    .scaleX(1f).scaleY(1f)
+                                    .setDuration(200)
+                                    .start();
+                        }).start();
+
+                // Repete esse "batimento" a cada 4 segundos
+                btnAdicionarMain.postDelayed(this, 4000);
+            }
+        };
+
+        // Inicia a animação 2 segundos após o aplicativo abrir
+        btnAdicionarMain.postDelayed(animacaoPulso, 2000);
     }
 
     @Override
@@ -294,6 +322,25 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout layoutFormAssunto = formDialog.findViewById(R.id.layoutFormAssunto);
         ImageView btnFechar = formDialog.findViewById(R.id.btnFecharMateria);
 
+        TextView btnAddMateria = formDialog.findViewById(R.id.btnAdicionarNovaMateria);
+        TextView btnAddAssunto = formDialog.findViewById(R.id.btnAdicionarNovoAssunto);
+
+// A aba padrão ao abrir é Matéria, então escondemos o botão de Assunto
+        if (btnAddMateria != null) btnAddMateria.setVisibility(View.VISIBLE);
+        if (btnAddAssunto != null) btnAddAssunto.setVisibility(View.GONE);
+
+// Aqui você pode colocar a sua lógica funcional de clique neles:
+        if (btnAddMateria != null) {
+            btnAddMateria.setOnClickListener(v -> {
+                // Sua lógica funcional de adicionar mais matérias
+            });
+        }
+        if (btnAddAssunto != null) {
+            btnAddAssunto.setOnClickListener(v -> {
+                // Sua lógica funcional de adicionar mais assuntos
+            });
+        }
+
         TextView lblTituloForm = formDialog.findViewById(R.id.lblTituloForm);
         com.google.android.material.button.MaterialButton btnConfirmar = formDialog.findViewById(R.id.btnConfirmarCadastro);
         com.google.android.material.button.MaterialButton btnToggleMateria = formDialog.findViewById(R.id.btnToggleMateria);
@@ -366,6 +413,20 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
                         }
+                        datePickerDialog.setOnShowListener(new android.content.DialogInterface.OnShowListener() {
+                            @Override
+                            public void onShow(android.content.DialogInterface dialogInterface) {
+                                android.widget.Button btnPositivo = datePickerDialog.getButton(android.app.DatePickerDialog.BUTTON_POSITIVE);
+                                android.widget.Button btnNegativo = datePickerDialog.getButton(android.app.DatePickerDialog.BUTTON_NEGATIVE);
+
+                                if (btnPositivo != null) {
+                                    btnPositivo.setTextColor(android.graphics.Color.parseColor("#584039"));
+                                }
+                                if (btnNegativo != null) {
+                                    btnNegativo.setTextColor(android.graphics.Color.parseColor("#584039"));
+                                }
+                            }
+                        });
                         datePickerDialog.show();
                     });
 
@@ -405,6 +466,8 @@ public class MainActivity extends AppCompatActivity {
                         btnToggleMateria.setTextColor(Color.WHITE);
                         btnToggleAssunto.setBackgroundColor(Color.TRANSPARENT);
                         btnToggleAssunto.setTextColor(Color.parseColor("#8D7B73"));
+                        if (btnAddMateria != null) btnAddMateria.setVisibility(View.VISIBLE);
+                        if (btnAddAssunto != null) btnAddAssunto.setVisibility(View.GONE);
 
                     } else if (checkedId == R.id.btnToggleAssunto) {
                         if (lblTituloForm != null) lblTituloForm.setText("Novo Assunto");
@@ -415,12 +478,81 @@ public class MainActivity extends AppCompatActivity {
                         btnToggleAssunto.setTextColor(Color.WHITE);
                         btnToggleMateria.setBackgroundColor(Color.TRANSPARENT);
                         btnToggleMateria.setTextColor(Color.parseColor("#8D7B73"));
+                        if (btnAddMateria != null) btnAddMateria.setVisibility(View.GONE);
+                        if (btnAddAssunto != null) btnAddAssunto.setVisibility(View.VISIBLE);
                     }
                 }
             });
         }
 
         if (btnConfirmar != null) {
+            // Lógica: Salvar Matéria e limpar campos (Continuar na tela)
+            if (btnAddMateria != null) {
+                btnAddMateria.setOnClickListener(v -> {
+                    String nomeMateria = padronizarTexto(inputNomeMateria.getText().toString());
+                    String metaString = inputMetaMateria.getText().toString().trim();
+
+                    if (nomeMateria.isEmpty()) {
+                        mostrarNotificacao(btnAddMateria, "Preencha o nome da matéria!", true);
+                        return;
+                    }
+
+                    double meta = metaString.isEmpty() ? 0.0 : Double.parseDouble(metaString);
+                    long id = dbHelper.inserirMateria(nomeMateria, meta);
+
+                    if (id == -2) {
+                        mostrarNotificacao(btnAddMateria, "A matéria '" + nomeMateria + "' já existe!", true);
+                    } else if (id != -1) {
+                        materiaSelecionadaAtual = nomeMateria;
+                        mostrarNotificacao(btnAddMateria, "Salvo! Pode adicionar a próxima.", false);
+                        atualizarTelaCompleta();
+
+                        // LIMPA OS CAMPOS PARA A PRÓXIMA!
+                        inputNomeMateria.setText("");
+                        inputMetaMateria.setText("");
+                        inputNomeMateria.requestFocus();
+                    }
+                });
+            }
+
+            // Lógica: Salvar Assunto e limpar campos (Continuar na tela)
+            if (btnAddAssunto != null) {
+                btnAddAssunto.setOnClickListener(v -> {
+                    String materiaVinculada = autoCompleteVinculoMateria.getText().toString().trim();
+                    String nomeAssunto = padronizarTexto(inputNomeAssunto.getText().toString());
+                    String qtdRevisoesStr = autoQtdRevisoes.getText().toString().trim();
+
+                    if (materiaVinculada.isEmpty() || nomeAssunto.isEmpty() || qtdRevisoesStr.isEmpty()) {
+                        mostrarNotificacao(btnAddAssunto, "Preencha todos os campos do assunto!", true);
+                        return;
+                    }
+
+                    List<String> datasPreenchidas = new ArrayList<>();
+                    for (com.google.android.material.textfield.TextInputEditText input : listaInputsData) {
+                        String dataText = input.getText().toString().trim();
+                        if (dataText.isEmpty() || !dataText.contains("/")) {
+                            mostrarNotificacao(btnAddAssunto, "Preencha TODAS as datas!", true);
+                            return;
+                        }
+                        datasPreenchidas.add(dataText);
+                    }
+
+                    int qtd = Integer.parseInt(qtdRevisoesStr);
+                    long id = dbHelper.inserirAssuntoComRevisoes(materiaVinculada, nomeAssunto, qtd, datasPreenchidas);
+
+                    if (id == -2) {
+                        mostrarNotificacao(btnAddAssunto, "Este assunto já existe nessa matéria!", true);
+                    } else if (id != -1) {
+                        mostrarNotificacao(btnAddAssunto, "Assunto salvo! Insira o próximo.", false);
+                        atualizarTelaCompleta();
+
+                        // LIMPA OS CAMPOS PARA O PRÓXIMO!
+                        inputNomeAssunto.setText("");
+                        inputNomeAssunto.requestFocus();
+                        // Mantém a matéria e a qtd de revisões, pois geralmente a pessoa vai cadastrar o próximo assunto do mesmo jeito!
+                    }
+                });
+            }
             btnConfirmar.setOnClickListener(v -> {
                 Runnable acaoConfirmar = null;
 
@@ -542,6 +674,17 @@ public class MainActivity extends AppCompatActivity {
         android.widget.AutoCompleteTextView autoEditAssuntoSelect = editDialog.findViewById(R.id.autoCompleteEditAssuntoSelect);
         com.google.android.material.textfield.TextInputEditText inputEditNomeAssunto = editDialog.findViewById(R.id.inputEditNomeAssunto);
 
+        android.widget.AutoCompleteTextView autoRevMateria = editDialog.findViewById(R.id.autoCompleteRevMateria);
+        android.widget.AutoCompleteTextView autoRevAssunto = editDialog.findViewById(R.id.autoCompleteRevAssunto);
+        TextView txtStatusRevisoes = editDialog.findViewById(R.id.txtStatusRevisoes);
+        LinearLayout containerRevisoes = editDialog.findViewById(R.id.containerListaEditRevisoes);
+        TextView btnAddRevisao = editDialog.findViewById(R.id.btnAdicionarNovaRevisao);
+
+        android.widget.AutoCompleteTextView autoNotaMateria = editDialog.findViewById(R.id.autoCompleteNotaMateria);
+        android.widget.AutoCompleteTextView autoNotaAssunto = editDialog.findViewById(R.id.autoCompleteNotaAssunto);
+        TextView txtStatusNotas = editDialog.findViewById(R.id.txtStatusNotas);
+        LinearLayout containerNotas = editDialog.findViewById(R.id.containerListaEditNotas);
+
         aplicarMascaraNota(inputEditMetaMateria);
 
         if (btnFechar != null) {
@@ -572,6 +715,23 @@ public class MainActivity extends AppCompatActivity {
             layoutEditAssunto.setVisibility(View.GONE);
             layoutEditRevisao.setVisibility(View.GONE);
             layoutEditNota.setVisibility(View.GONE);
+
+            // ZERAR TODOS OS CAMPOS AO TROCAR DE ABA
+            if (inputEditNomeMateria != null) inputEditNomeMateria.setText("");
+            if (inputEditMetaMateria != null) inputEditMetaMateria.setText("");
+            if (inputEditNomeAssunto != null) inputEditNomeAssunto.setText("");
+            if (autoEditMateriaSelect != null) autoEditMateriaSelect.setText("", false);
+            if (autoEditMateriaForAssunto != null) autoEditMateriaForAssunto.setText("", false);
+            if (autoEditAssuntoSelect != null) autoEditAssuntoSelect.setText("", false);
+            if (autoRevMateria != null) autoRevMateria.setText("", false);
+            if (autoRevAssunto != null) autoRevAssunto.setText("", false);
+            if (autoNotaMateria != null) autoNotaMateria.setText("", false);
+            if (autoNotaAssunto != null) autoNotaAssunto.setText("", false);
+            if (containerRevisoes != null) containerRevisoes.removeAllViews();
+            if (containerNotas != null) containerNotas.removeAllViews();
+            if (txtStatusRevisoes != null) txtStatusRevisoes.setText("Selecione um assunto para ver as revisões.");
+            if (txtStatusNotas != null) txtStatusNotas.setText("Selecione um assunto para ver as notas.");
+            if (btnAddRevisao != null) btnAddRevisao.setVisibility(View.GONE);
 
             TextView clicado = (TextView) view;
             clicado.setBackgroundColor(Color.parseColor("#584039"));
@@ -607,6 +767,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (autoEditMateriaSelect != null) autoEditMateriaSelect.setAdapter(adapterMateria);
         if (autoEditMateriaForAssunto != null) autoEditMateriaForAssunto.setAdapter(adapterMateria);
+        if (autoRevMateria != null) autoRevMateria.setAdapter(adapterMateria);
+        if (autoNotaMateria != null) autoNotaMateria.setAdapter(adapterMateria);
 
         if (autoEditMateriaSelect != null) {
             autoEditMateriaSelect.setOnItemClickListener((parent, view, position, id) -> {
@@ -634,17 +796,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // =====================================
-        // ABA REVISÕES (Lógica de Carregamento)
-        // =====================================
-        android.widget.AutoCompleteTextView autoRevMateria = editDialog.findViewById(R.id.autoCompleteRevMateria);
-        android.widget.AutoCompleteTextView autoRevAssunto = editDialog.findViewById(R.id.autoCompleteRevAssunto);
-        TextView txtStatusRevisoes = editDialog.findViewById(R.id.txtStatusRevisoes);
-        LinearLayout containerRevisoes = editDialog.findViewById(R.id.containerListaEditRevisoes);
-        TextView btnAddRevisao = editDialog.findViewById(R.id.btnAdicionarNovaRevisao);
-
-        if (autoRevMateria != null) autoRevMateria.setAdapter(adapterMateria);
-
         if (autoRevMateria != null && autoRevAssunto != null) {
             autoRevMateria.setOnItemClickListener((parent, view, position, id) -> {
                 String matEscolhida = adapterMateria.getItem(position);
@@ -664,16 +815,6 @@ public class MainActivity extends AppCompatActivity {
                 carregarRevisoesNoEditor(mat, ass, containerRevisoes, txtStatusRevisoes, btnAddRevisao);
             });
         }
-
-        // =====================================
-        // ABA NOTAS (Lógica de Carregamento)
-        // =====================================
-        android.widget.AutoCompleteTextView autoNotaMateria = editDialog.findViewById(R.id.autoCompleteNotaMateria);
-        android.widget.AutoCompleteTextView autoNotaAssunto = editDialog.findViewById(R.id.autoCompleteNotaAssunto);
-        TextView txtStatusNotas = editDialog.findViewById(R.id.txtStatusNotas);
-        LinearLayout containerNotas = editDialog.findViewById(R.id.containerListaEditNotas);
-
-        if (autoNotaMateria != null) autoNotaMateria.setAdapter(adapterMateria);
 
         if (autoNotaMateria != null && autoNotaAssunto != null) {
             autoNotaMateria.setOnItemClickListener((parent, view, position, id) -> {
@@ -709,18 +850,31 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     double novaMeta = novaMetaStr.isEmpty() ? 0.0 : Double.parseDouble(novaMetaStr);
-                    boolean sucesso = dbHelper.atualizarMateria(materiaAntiga, novoNome, novaMeta);
+                    double metaAntiga = dbHelper.obterMetaMateria(materiaAntiga);
 
-                    if (sucesso) {
-                        if (materiaSelecionadaAtual.equals(materiaAntiga)) {
-                            materiaSelecionadaAtual = novoNome;
-                        }
-                        mostrarNotificacao(viewSegura, "Matéria atualizada com sucesso!", false);
-                        atualizarTelaCompleta();
-                        editDialog.dismiss();
-                    } else {
-                        mostrarNotificacao(btnSalvar, "Erro: Já existe outra matéria com esse nome!", true);
-                    }
+                    String detalhes = "";
+                    if (!materiaAntiga.equals(novoNome)) detalhes += "Nome: " + materiaAntiga + " ➔ " + novoNome + "\n";
+                    if (novaMeta != metaAntiga) detalhes += "Meta: " + metaAntiga + " ➔ " + novaMeta;
+                    if (detalhes.isEmpty()) detalhes = "Nenhuma alteração detectada.";
+
+                    mostrarDialogUniversal(
+                            "Salvar Alterações?",
+                            "Resumo da Edição",
+                            detalhes,
+                            "Salvar",
+                            false,
+                            () -> {
+                                boolean sucesso = dbHelper.atualizarMateria(materiaAntiga, novoNome, novaMeta);
+                                if (sucesso) {
+                                    if (materiaSelecionadaAtual.equals(materiaAntiga)) materiaSelecionadaAtual = novoNome;
+                                    mostrarNotificacao(viewSegura, "Matéria atualizada com sucesso!", false);
+                                    atualizarTelaCompleta();
+                                    editDialog.dismiss();
+                                } else {
+                                    mostrarNotificacao(viewSegura, "Erro: Já existe outra matéria com esse nome!", true);
+                                }
+                            }
+                    );
 
                 } else if (layoutEditAssunto.getVisibility() == View.VISIBLE) {
                     String materiaSelecionada = autoEditMateriaForAssunto.getText().toString().trim();
@@ -732,19 +886,23 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    boolean sucesso = dbHelper.atualizarAssunto(materiaSelecionada, assuntoAntigo, novoNomeAssunto);
+                    String detalhes = "Nome: " + assuntoAntigo + " ➔ " + novoNomeAssunto;
 
-                    // Lógica para abrir a aba certa automaticamente (Gestos para Expert)
-                    if ("MATERIA".equals(abaPendenteModal)) {
-                        btnNavMateria.performClick();
-                        abaPendenteModal = "";
-                    } else if ("ASSUNTO".equals(abaPendenteModal)) {
-                        btnNavAssunto.performClick();
-                        abaPendenteModal = "";
-                    } else if ("REVISAO".equals(abaPendenteModal)) {
-                        btnNavRevisao.performClick();
-                        abaPendenteModal = "";
-                    }
+                    mostrarDialogUniversal(
+                            "Salvar Alterações?",
+                            "Resumo da Edição",
+                            detalhes,
+                            "Salvar",
+                            false,
+                            () -> {
+                                boolean sucesso = dbHelper.atualizarAssunto(materiaSelecionada, assuntoAntigo, novoNomeAssunto);
+                                if (sucesso) {
+                                    mostrarNotificacao(viewSegura, "Assunto atualizado!", false);
+                                    atualizarTelaCompleta();
+                                    editDialog.dismiss();
+                                }
+                            }
+                    );
                 }
             });
         }
@@ -756,16 +914,21 @@ public class MainActivity extends AppCompatActivity {
         } else if ("ASSUNTO".equals(abaPendenteModal)) {
             btnNavAssunto.performClick();
             abaPendenteModal = "";
+        } else if ("REVISAO".equals(abaPendenteModal)) {
+            btnNavRevisao.performClick();
+            abaPendenteModal = "";
+        } else {
+            btnNavMateria.performClick(); // Força a aba matéria ao abrir do zero
         }
         editDialog.show();
     }
 
     private void mostrarDialogConfirmacaoMateria(BottomSheetDialog formPai, String nomeMateria, String metaTxt, Runnable acaoSalvar) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.TemaAlertaSun);
         View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_confirmacao, null);
         builder.setView(dialogView);
 
-        android.app.AlertDialog dialog = builder.create();
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
 
         TextView txtType = dialogView.findViewById(R.id.txtResumoLinha1Type);
@@ -795,11 +958,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void mostrarDialogConfirmacaoAssunto(BottomSheetDialog formPai, String nomeMateria, String nomeAssunto, int qtdRevisoes, String dataInicial, String dataFinal, Runnable acaoSalvar) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.TemaAlertaSun);
         View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_confirmacao, null);
         builder.setView(dialogView);
 
-        android.app.AlertDialog dialog = builder.create();
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
 
         TextView txtType = dialogView.findViewById(R.id.txtResumoLinha1Type);
@@ -836,11 +999,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void mostrarDialogConfirmacaoNota(BottomSheetDialog formPai, String nomeMateria, String nomeAssunto, String tipoNota, String valorNota, String refRevisao, Runnable acaoSalvar) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.TemaAlertaSun);
         View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_confirmacao, null);
         builder.setView(dialogView);
 
-        android.app.AlertDialog dialog = builder.create();
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
 
         TextView txtType = dialogView.findViewById(R.id.txtResumoLinha1Type);
@@ -1474,9 +1637,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 2. Blindagem de Revisão
-    // ==========================================
-    // ABA REVISÕES (COM ALINHAMENTO PERFEITO)
-    // ==========================================
     private void carregarRevisoesNoEditor(String materia, String assunto, LinearLayout container, TextView txtStatus, TextView btnAdd) {
         container.removeAllViews();
         List<java.util.HashMap<String, String>> revisoes = dbHelper.obterRevisoesDoAssunto(materia, assunto);
@@ -1595,6 +1755,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } catch (Exception e) {}
 
+                datePickerDialog.setOnShowListener(d -> {
+                    android.widget.Button btnPos = datePickerDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
+                    android.widget.Button btnNeg = datePickerDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE);
+                    if (btnPos != null) btnPos.setTextColor(android.graphics.Color.parseColor("#584039"));
+                    if (btnNeg != null) btnNeg.setTextColor(android.graphics.Color.parseColor("#584039"));
+                });
                 datePickerDialog.show();
             });
 
@@ -1704,7 +1870,6 @@ public class MainActivity extends AppCompatActivity {
             lblRev.setTypeface(null, android.graphics.Typeface.BOLD);
             lblRev.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
 
-            // CONTAINER DA DIREITA COM ALINHAMENTO FIXO
             LinearLayout rightContainer = new LinearLayout(this);
             rightContainer.setOrientation(LinearLayout.HORIZONTAL);
             rightContainer.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
@@ -1725,57 +1890,104 @@ public class MainActivity extends AppCompatActivity {
                 iconLock.setImageResource(R.drawable.ic_check_concluido);
                 iconLock.setVisibility(View.VISIBLE);
 
-                // =========================================================
-                // MÁGICA UX: ANIMAÇÃO DE PULSO (Dica visual de clique)
-                // =========================================================
                 Runnable pulseAnimation = new Runnable() {
                     @Override
                     public void run() {
-                        // Faz a linha inteira dar uma leve "pulsada" (Aumenta 2% e volta)
-                        row.animate()
-                                .scaleX(1.08f).scaleY(1.08f)
-                                .setDuration(200)
-                                .withEndAction(() -> {
-                                    row.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
-                                }).start();
-
-                        // Repete essa mesma animação a cada 10 segundos
+                        row.animate().scaleX(1.08f).scaleY(1.08f).setDuration(200).withEndAction(() -> {
+                            row.animate().scaleX(1f).scaleY(1f).setDuration(200).start();
+                        }).start();
                         row.postDelayed(this, 5000);
                     }
                 };
-
-                // Começa a animação 1.5 segundos após abrir a tela.
-                // Bônus Sênior: O "+ (i * 200)" faz um efeito cascata! A revisão 1 pulsa,
-                // depois a 2, depois a 3... fica parecendo um batimento cardíaco na lista!
                 row.postDelayed(pulseAnimation, 1500 + (i * 200));
 
-                // CLIQUE PARA EDITAR A NOTA
                 row.setOnClickListener(v -> {
-                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-                    builder.setTitle("Editar Nota - Revisão " + numeroRevisao);
+                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
 
-                    final android.widget.EditText input = new android.widget.EditText(MainActivity.this);
-                    input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                    input.setText(notaAtual);
-                    input.selectAll();
-                    builder.setView(input);
+                    LinearLayout layoutDialog = new LinearLayout(MainActivity.this);
+                    layoutDialog.setOrientation(LinearLayout.VERTICAL);
+                    layoutDialog.setBackgroundResource(R.drawable.bg_popup_arredondado);
+                    layoutDialog.setPadding(64, 64, 64, 48);
 
-                    builder.setPositiveButton("Salvar", (dialog, which) -> {
-                        try {
-                            double novaNota = Double.parseDouble(input.getText().toString().replace(",", "."));
-                            if (novaNota < 0 || novaNota > 10) throw new NumberFormatException();
+                    TextView txtTitulo = new TextView(MainActivity.this);
+                    txtTitulo.setText("Editar Nota - Revisão " + numeroRevisao);
+                    txtTitulo.setTextColor(Color.parseColor("#584039"));
+                    txtTitulo.setTextSize(18f);
+                    txtTitulo.setTypeface(null, Typeface.BOLD);
+                    txtTitulo.setGravity(android.view.Gravity.CENTER);
 
-                            if (dbHelper.atualizarNotaDesempenho(Integer.parseInt(desempenhoId), novaNota)) {
-                                mostrarNotificacao(container, "Nota atualizada!", false);
-                                carregarNotasNoEditor(materia, assunto, container, txtStatus);
-                                atualizarTelaCompleta();
-                            }
-                        } catch (Exception e) {
-                            mostrarNotificacao(container, "Digite uma nota válida entre 0 e 10!", true);
+                    // Como a máscara do seu projeto exige um TextInputEditText, nós criamos um na hora!
+                    final com.google.android.material.textfield.TextInputEditText inputNota = new com.google.android.material.textfield.TextInputEditText(MainActivity.this);
+                    inputNota.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    inputNota.setText(notaAtual);
+                    inputNota.setTextColor(Color.parseColor("#584039"));
+                    inputNota.setGravity(android.view.Gravity.CENTER);
+
+                    // MÁGICA 1: Aplica a máscara que você já criou para travar até 10.0
+                    aplicarMascaraNota(inputNota);
+                    inputNota.selectAll();
+
+                    LinearLayout.LayoutParams paramsInput = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    paramsInput.setMargins(0, 32, 0, 32);
+                    inputNota.setLayoutParams(paramsInput);
+
+                    LinearLayout layoutBotoes = new LinearLayout(MainActivity.this);
+                    layoutBotoes.setOrientation(LinearLayout.HORIZONTAL);
+                    layoutBotoes.setGravity(android.view.Gravity.END);
+
+                    android.app.AlertDialog dialogDigitacao = builder.create();
+                    dialogDigitacao.setView(layoutDialog);
+                    dialogDigitacao.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+
+                    TextView btnCancelar = new TextView(MainActivity.this);
+                    btnCancelar.setText("Cancelar");
+                    btnCancelar.setTextColor(Color.parseColor("#8D7B73"));
+                    btnCancelar.setPadding(32, 16, 32, 16);
+                    btnCancelar.setOnClickListener(v2 -> dialogDigitacao.dismiss());
+
+                    TextView btnSalvar = new TextView(MainActivity.this);
+                    btnSalvar.setText("Avançar"); // Muda o nome para indicar que tem mais um passo
+                    btnSalvar.setTextColor(Color.parseColor("#584039"));
+                    btnSalvar.setTypeface(null, Typeface.BOLD);
+                    btnSalvar.setPadding(32, 16, 32, 16);
+                    btnSalvar.setOnClickListener(v2 -> {
+                        String notaDigitada = inputNota.getText().toString();
+                        if(notaDigitada.isEmpty()) {
+                            mostrarNotificacao(container, "A nota não pode ficar vazia!", true);
+                            return;
                         }
+
+                        dialogDigitacao.dismiss(); // Fecha a tela de digitar
+
+                        // MÁGICA 2: Abre a sua confirmação do gatinho!
+                        mostrarDialogUniversal(
+                                "Salvar Nova Nota?",
+                                "Revisão " + numeroRevisao,
+                                "Nota: " + notaAtual + " ➔ " + notaDigitada, // Mostra o "Antes -> Depois"
+                                "Salvar",
+                                false, // Marrom, pois é salvar
+                                () -> {
+                                    try {
+                                        double novaNota = Double.parseDouble(notaDigitada.replace(",", "."));
+                                        if (dbHelper.atualizarNotaDesempenho(Integer.parseInt(desempenhoId), novaNota)) {
+                                            mostrarNotificacao(container, "Nota atualizada!", false);
+                                            carregarNotasNoEditor(materia, assunto, container, txtStatus);
+                                            atualizarTelaCompleta();
+                                        }
+                                    } catch (Exception e) {
+                                        mostrarNotificacao(container, "Erro ao salvar a nota!", true);
+                                    }
+                                }
+                        );
                     });
-                    builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
-                    builder.show();
+
+                    layoutBotoes.addView(btnCancelar);
+                    layoutBotoes.addView(btnSalvar);
+                    layoutDialog.addView(txtTitulo);
+                    layoutDialog.addView(inputNota);
+                    layoutDialog.addView(layoutBotoes);
+
+                    dialogDigitacao.show();
                 });
 
             } else {
@@ -1783,7 +1995,7 @@ public class MainActivity extends AppCompatActivity {
                 txtNota.setTextColor(android.graphics.Color.parseColor("#8D7B73"));
                 iconLock.setImageResource(android.R.drawable.ic_secure);
                 iconLock.setColorFilter(android.graphics.Color.parseColor("#8D7B73"));
-                iconLock.setVisibility(View.VISIBLE); // Mostra o cadeado na pendente
+                iconLock.setVisibility(View.VISIBLE);
 
                 row.setOnClickListener(v -> mostrarNotificacao(container, "Conclua esta revisão primeiro para dar uma nota!", true));
             }
@@ -1860,21 +2072,20 @@ public class MainActivity extends AppCompatActivity {
             txtDir.setTextSize(16f);
 
             ImageView iconTrash = new ImageView(this);
-            iconTrash.setImageResource(android.R.drawable.ic_menu_delete); // Lixeira nativa
-            iconTrash.setColorFilter(android.graphics.Color.parseColor("#D9534F")); // Vermelha
+            iconTrash.setImageResource(android.R.drawable.ic_menu_delete);
+            iconTrash.setColorFilter(android.graphics.Color.parseColor("#D9534F"));
             int iconSize = (int) (20 * getResources().getDisplayMetrics().density);
             LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
             iconParams.setMargins((int) (12 * getResources().getDisplayMetrics().density), 0, 0, 0);
             iconTrash.setLayoutParams(iconParams);
 
-            // Regras de Exibição dependendo da Aba selecionada (Revisão ou Nota)
             boolean podeExcluir = false;
 
             if (tipo.equals("REVISAO")) {
                 txtDir.setText(rev.get("data"));
                 if (status.equalsIgnoreCase("CONCLUIDA")) {
                     txtDir.setTextColor(android.graphics.Color.parseColor("#8D7B73"));
-                    iconTrash.setVisibility(View.INVISIBLE); // Não deixa apagar revisão concluída (apague a nota primeiro)
+                    iconTrash.setVisibility(View.INVISIBLE);
                 } else {
                     txtDir.setTextColor(android.graphics.Color.parseColor("#584039"));
                     iconTrash.setVisibility(View.VISIBLE);
@@ -1896,23 +2107,22 @@ public class MainActivity extends AppCompatActivity {
             rightContainer.addView(txtDir);
             rightContainer.addView(iconTrash);
 
-            // Ação de Exclusão Individual
             if (podeExcluir) {
                 row.setOnClickListener(v -> {
-                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
-                            .setTitle(tipo.equals("REVISAO") ? "Excluir Revisão?" : "Excluir Nota?")
-                            .setMessage("Tem certeza que deseja apagar permanentemente?")
-                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                    mostrarDialogUniversal(
+                            tipo.equals("REVISAO") ? "Excluir Revisão" : "Excluir Nota",
+                            tipo.equals("REVISAO") ? "Revisão " + numeroRevisao : "Nota: " + nota,
+                            "Tem certeza que deseja apagar permanentemente?",
+                            "Sim, Excluir",
+                            true, // Botão vermelho
+                            null,
+                            () -> {
                                 boolean sucesso;
-
-                                // Se for Nota, a exclusão reverte a revisão para "PENDENTE"
                                 if (tipo.equals("NOTA")) {
-                                    // Precisamos do ID do assunto para reverter a revisão correta
                                     android.database.Cursor cAssId = dbHelper.getReadableDatabase().rawQuery("SELECT a.id FROM assuntos a INNER JOIN materias m ON a.materia_id = m.id WHERE m.nome = ? AND a.nome = ?", new String[]{materia, assunto});
                                     int assId = -1;
                                     if (cAssId.moveToFirst()) assId = cAssId.getInt(0);
                                     cAssId.close();
-
                                     sucesso = dbHelper.excluirNotaEspecifica(desempenhoId, assId);
                                 } else {
                                     sucesso = dbHelper.excluirRevisaoEspecifica(revId);
@@ -1923,9 +2133,8 @@ public class MainActivity extends AppCompatActivity {
                                     carregarListaExclusao(materia, assunto, container, txtStatus, tipo);
                                     atualizarTelaCompleta();
                                 }
-                            })
-                            .setNegativeButton("Cancelar", null)
-                            .show();
+                            }
+                    );
                 });
             } else {
                 row.setOnClickListener(v -> {
@@ -2007,8 +2216,17 @@ public class MainActivity extends AppCompatActivity {
             layoutDelAssunto.setVisibility(View.GONE);
             layoutDelListas.setVisibility(View.GONE);
 
+            // ZERAR TODOS OS CAMPOS AO TROCAR DE ABA
+            if (autoDelMateria != null) autoDelMateria.setText("", false);
+            if (autoDelMatAssunto != null) autoDelMatAssunto.setText("", false);
+            if (autoDelAssunto != null) autoDelAssunto.setText("", false);
+            if (autoDelListMat != null) autoDelListMat.setText("", false);
+            if (autoDelListAss != null) autoDelListAss.setText("", false);
+            if (containerListaDelete != null) containerListaDelete.removeAllViews();
+            if (txtStatusDelete != null) txtStatusDelete.setText("Selecione um assunto.");
+
             TextView clicado = (TextView) view;
-            clicado.setBackgroundColor(Color.parseColor("#D9534F")); // Vermelho Alerta
+            clicado.setBackgroundColor(Color.parseColor("#D9534F"));
             clicado.setTextColor(Color.WHITE);
             clicado.setTypeface(null, Typeface.BOLD);
 
@@ -2023,15 +2241,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (clicado.getId() == R.id.btnDelToggleRevisao) {
                 lblTituloForm.setText("Excluir Revisão");
                 layoutDelListas.setVisibility(View.VISIBLE);
-                btnConfirmar.setVisibility(View.GONE); // Apaga clicando direto na lixeira
-                containerListaDelete.removeAllViews();
-                autoDelListAss.setText("", false);
+                btnConfirmar.setVisibility(View.GONE);
             } else if (clicado.getId() == R.id.btnDelToggleNota) {
                 lblTituloForm.setText("Excluir Nota");
                 layoutDelListas.setVisibility(View.VISIBLE);
                 btnConfirmar.setVisibility(View.GONE);
-                containerListaDelete.removeAllViews();
-                autoDelListAss.setText("", false);
             }
         };
 
@@ -2089,18 +2303,20 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
-                            .setTitle("Excluir Matéria?")
-                            .setMessage("Isso apagará todas as revisões, assuntos e notas de " + mat + ". Tem certeza?")
-                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                    mostrarDialogUniversal(
+                            "Excluir Matéria",
+                            mat,
+                            "Atenção: Apagará todas as revisões, assuntos e notas!",
+                            "Sim, Excluir",
+                            true,
+                            () -> {
                                 if (dbHelper.excluirMateria(mat)) {
                                     mostrarNotificacao(viewSegura, "Matéria excluída com sucesso!", false);
                                     atualizarTelaCompleta();
                                     delDialog.dismiss();
                                 }
-                            })
-                            .setNegativeButton("Cancelar", null)
-                            .show();
+                            }
+                    );
 
                 } else if (layoutDelAssunto.getVisibility() == View.VISIBLE) {
                     String mat = autoDelMatAssunto.getText().toString().trim();
@@ -2110,24 +2326,25 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    new android.app.AlertDialog.Builder(MainActivity.this, R.style.TemaAlertaSun)
-                            .setTitle("Excluir Assunto?")
-                            .setMessage("Isso apagará o assunto " + ass + " e suas revisões. Continuar?")
-                            .setPositiveButton("Sim, Excluir", (dialog, which) -> {
+                    mostrarDialogUniversal(
+                            "Excluir Assunto",
+                            ass,
+                            "Atenção: Isso apagará este assunto e suas revisões!",
+                            "Sim, Excluir",
+                            true,
+                            () -> {
                                 if (dbHelper.excluirAssunto(mat, ass)) {
                                     mostrarNotificacao(viewSegura, "Assunto excluído!", false);
                                     atualizarTelaCompleta();
                                     delDialog.dismiss();
                                 }
-                            })
-                            .setNegativeButton("Cancelar", null)
-                            .show();
+                            }
+                    );
                 }
             });
         }
 
         delDialog.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
-        // Lógica para abrir a aba certa automaticamente (Gestos para Expert)
         if ("MATERIA".equals(abaPendenteModal)) {
             btnNavMateria.performClick();
             abaPendenteModal = "";
@@ -2137,13 +2354,12 @@ public class MainActivity extends AppCompatActivity {
         } else if ("REVISAO".equals(abaPendenteModal)) {
             btnNavRevisao.performClick();
             abaPendenteModal = "";
+        } else {
+            btnNavMateria.performClick(); // Força a aba matéria ao abrir do zero
         }
         delDialog.show();
     }
 
-    // ==========================================
-    // MENU FLUTUANTE (GESTOS PARA EXPERTS)
-    // ==========================================
     // ==========================================
     // MENU FLUTUANTE ESTILIZADO (GESTOS PARA EXPERTS)
     // ==========================================
@@ -2154,8 +2370,8 @@ public class MainActivity extends AppCompatActivity {
             android.content.Context wrapper = new android.view.ContextThemeWrapper(MainActivity.this, R.style.TemaMenuFlutuante);
             android.widget.PopupMenu popup = new android.widget.PopupMenu(wrapper, v);
 
-            popup.getMenu().add(0, 1, 0, "Editar").setIcon(android.R.drawable.ic_menu_edit);
-            popup.getMenu().add(0, 2, 0, "Excluir").setIcon(android.R.drawable.ic_menu_delete);
+            popup.getMenu().add(0, 1, 0, "Editar").setIcon(R.drawable.ic_menu_edit_novo);
+            popup.getMenu().add(0, 2, 0, "Excluir").setIcon(R.drawable.ic_menu_delete_novo);
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 popup.setForceShowIcon(true);
@@ -2173,5 +2389,80 @@ public class MainActivity extends AppCompatActivity {
             popup.show();
             return true;
         });
+    }
+
+    // ==========================================
+    // O VERDADEIRO MAESTRO (USANDO O SEU MODAL DO GATINHO)
+    // ==========================================
+    // ==========================================
+    // O VERDADEIRO MAESTRO (VERSÃO 1 - NORMAL, SEM CAMPO DE TEXTO)
+    // ==========================================
+    private void mostrarDialogUniversal(String titulo, String subtitulo, String textoAviso, String textoBotao, boolean isPerigo, Runnable acaoConfirmar) {
+        mostrarDialogUniversal(titulo, subtitulo, textoAviso, textoBotao, isPerigo, null, acaoConfirmar);
+    }
+
+    // ==========================================
+    // O VERDADEIRO MAESTRO (VERSÃO 2 - COMPLETA, COM CAMPO DE TEXTO EXTRA)
+    // ==========================================
+    private void mostrarDialogUniversal(String titulo, String subtitulo, String textoAviso, String textoBotao, boolean isPerigo, android.view.View inputExtra, Runnable acaoConfirmar) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        android.view.View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_confirmacao, null);
+        builder.setView(dialogView);
+
+        android.app.AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        android.widget.TextView txtType = dialogView.findViewById(R.id.txtResumoLinha1Type);
+        android.widget.TextView txtMeta = dialogView.findViewById(R.id.txtResumoLinha1Meta);
+        android.widget.TextView txtName = dialogView.findViewById(R.id.txtResumoLinha2Name);
+        android.widget.TextView txtEx1 = dialogView.findViewById(R.id.txtResumoLinha3Extra1);
+        android.widget.TextView txtEx2 = dialogView.findViewById(R.id.txtResumoLinha4Extra2);
+
+        android.view.View btnCancelar = dialogView.findViewById(R.id.btnCancelarDialog);
+        android.view.View btnConfirmar = dialogView.findViewById(R.id.btnConfirmarDialog);
+
+        if (txtType != null) txtType.setText(titulo);
+        if (txtMeta != null) txtMeta.setVisibility(android.view.View.GONE);
+        if (txtName != null) txtName.setText(subtitulo);
+
+        if (txtEx1 != null) {
+            if (textoAviso != null && !textoAviso.isEmpty()) {
+                txtEx1.setVisibility(android.view.View.VISIBLE);
+                txtEx1.setText(textoAviso);
+                txtEx1.setTextColor(android.graphics.Color.parseColor(isPerigo ? "#D9534F" : "#8D7B73"));
+            } else {
+                txtEx1.setVisibility(android.view.View.GONE);
+            }
+        }
+        if (txtEx2 != null) txtEx2.setVisibility(android.view.View.GONE);
+
+        if (btnConfirmar instanceof android.widget.TextView) {
+            ((android.widget.TextView) btnConfirmar).setText(textoBotao);
+            if (isPerigo) {
+                btnConfirmar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#D9534F")));
+            } else {
+                btnConfirmar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#584039")));
+            }
+        }
+
+        // MÁGICA: Injeta o campo de nota (EditText) antes dos botões, se existir!
+        if (inputExtra != null && dialogView instanceof android.view.ViewGroup) {
+            android.view.ViewGroup root = (android.view.ViewGroup) dialogView;
+            android.view.View botoesParent = (android.view.View) btnConfirmar.getParent();
+            int index = root.indexOfChild(botoesParent);
+            if (index > 0) {
+                root.addView(inputExtra, index);
+            } else {
+                root.addView(inputExtra);
+            }
+        }
+
+        if (btnCancelar != null) btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        if (btnConfirmar != null) btnConfirmar.setOnClickListener(v -> {
+            if (acaoConfirmar != null) acaoConfirmar.run();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 }

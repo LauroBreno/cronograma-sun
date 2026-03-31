@@ -1,9 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Base.Theme.CronogramaSun" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/bege_fundo</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="colorPrimary">@color/marrom_escuro</item>
         <item name="android:textColorHighlight">#4D584039</item>
+
+        <item name="android:navigationBarColor">@color/bege_fundo</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
     <style name="Theme.CronogramaSun" parent="Base.Theme.CronogramaSun" />
@@ -14,26 +18,31 @@
 
     <style name="TemaCalendarioSun" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/marrom_escuro</item>
+        <item name="colorPrimary">@color/marrom_escuro</item>
         <item name="android:colorBackground">@color/bege_fundo</item>
         <item name="android:textColorPrimary">@color/marrom_escuro</item>
         <item name="buttonBarPositiveButtonStyle">@style/BotaoMarromDialog</item>
-        <item name="android:headerBackground">@color/marrom_escuro</item>
-        <item name="android:colorAccent">@color/marrom_escuro</item>
         <item name="buttonBarNegativeButtonStyle">@style/BotaoMarromDialog</item>
+        <item name="dialogCornerRadius">28dp</item>
     </style>
 
-    <style name="TemaAlertaSun" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/marrom_escuro</item>
-        <item name="android:colorBackground">@color/bege_fundo</item>
-        <item name="android:textColorPrimary">@color/marrom_escuro</item>
-        <item name="buttonBarPositiveButtonStyle">@style/BotaoMarromDialog</item>
+    <style name="TemaAlertaSun" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/bege_fundo</item>
+        <item name="colorOnSurface">@color/marrom_escuro</item>
+        <item name="colorOnSurfaceVariant">@color/marrom_escuro</item>
         <item name="colorPrimary">@color/marrom_escuro</item>
-        <item name="android:colorPrimary">@color/marrom_escuro</item>
-        <item name="buttonBarNegativeButtonStyle">@style/BotaoMarromDialog</item>
+        <item name="dialogCornerRadius">28dp</item>
     </style>
 
     <style name="TemaMenuFlutuante" parent="Theme.AppCompat.Light">
-        <item name="android:popupBackground">@color/bege_fundo</item>
+        <item name="popupMenuStyle">@style/EstiloCaixaMenu</item>
+        <item name="android:popupMenuStyle">@style/EstiloCaixaMenu</item>
         <item name="android:textColorPrimary">@color/marrom_escuro</item>
+        <item name="android:colorBackground">@color/bege_fundo</item>
     </style>
+
+    <style name="EstiloCaixaMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_arredondado</item>
+    </style>
+
 </resources>

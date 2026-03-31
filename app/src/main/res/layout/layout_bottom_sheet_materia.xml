@@ -51,7 +51,7 @@
             android:orientation="vertical"
             android:clipChildren="false">
 
-            <FrameLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipChildren="false"
@@ -91,14 +91,15 @@
                     android:id="@+id/lottieCatForm"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
-                    android:layout_gravity="top|end"
+                    android:layout_alignTop="@id/toggleGroupMateriaAssunto"
+                    android:layout_alignEnd="@id/toggleGroupMateriaAssunto"
+                    android:layout_marginTop="-45dp"
                     android:layout_marginEnd="16dp"
                     android:elevation="5dp"
-                    android:translationY="-24dp"
                     app:lottie_autoPlay="true"
                     app:lottie_loop="true"
                     app:lottie_rawRes="@raw/loader_cat" />
-            </FrameLayout>
+            </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/layoutFormMateria"
@@ -179,8 +180,7 @@
                         android:inputType="none"
                         android:paddingVertical="16dp"
                         android:textColor="@color/marrom_escuro"
-                        android:popupBackground="@drawable/shape_dropdown_popup"
-                        />
+                        android:popupBackground="@drawable/shape_dropdown_popup" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -226,7 +226,7 @@
                         android:inputType="none"
                         android:paddingVertical="16dp"
                         android:textColor="@color/marrom_escuro"
-                        android:popupBackground="@drawable/shape_dropdown_popup"/>
+                        android:popupBackground="@drawable/shape_dropdown_popup" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
@@ -239,17 +239,36 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/btnAdicionarOutroCadastro"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:padding="8dp"
-                android:text="+ Adicionar mais"
-                android:textColor="@color/marrom_texto_claro"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/btnAdicionarNovaMateria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="32dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="8dp"
+                    android:text="+ Adicionar Nova Matéria"
+                    android:textColor="@color/marrom_texto_claro"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnAdicionarNovoAssunto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="8dp"
+                    android:text="+ Adicionar Novo Assunto"
+                    android:textColor="@color/marrom_texto_claro"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnConfirmarCadastro"
